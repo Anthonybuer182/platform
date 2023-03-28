@@ -3,7 +3,7 @@ package infras
 import (
 	"context"
 
-	"platform/internal/order/usecases/orders"
+	"platform/internal/user/usecases/orders"
 	"platform/pkg/rabbitmq/publisher"
 
 	"github.com/google/wire"

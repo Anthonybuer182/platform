@@ -3,9 +3,9 @@ package handlers
 import (
 	"context"
 
-	"platform/internal/order/events"
-	"platform/internal/order/usecases/orders"
 	"platform/internal/pkg/event"
+	"platform/internal/user/events"
+	"platform/internal/user/usecases/orders"
 
 	"github.com/google/wire"
 	"github.com/pkg/errors"

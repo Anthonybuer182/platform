@@ -3,10 +3,10 @@ package router
 import (
 	"context"
 	"fmt"
-	"platform/cmd/order/config"
-	"platform/internal/order/domain"
-	"platform/internal/order/usecases/orders"
+	"platform/cmd/user/config"
 	shared "platform/internal/pkg/shared_kernel"
+	"platform/internal/user/domain"
+	"platform/internal/user/usecases/orders"
 	gen "platform/proto/gen"
 
 	"github.com/google/uuid"

@@ -9,22 +9,16 @@ package app
 import (
 	"github.com/rabbitmq/amqp091-go"
 	"platform/cmd/order/config"
-	"platform/internal/order/app/router"
-	"platform/internal/order/events/handlers"
-	"platform/internal/order/infras"
-	grpc2 "platform/internal/order/infras/grpc"
-	"platform/internal/order/infras/repo"
-	"platform/internal/order/usecases/orders"
+	"platform/internal/order/eventhandlers"
 	"platform/pkg/postgres"
 	"platform/pkg/rabbitmq"
 	"platform/pkg/rabbitmq/consumer"
 	"platform/pkg/rabbitmq/publisher"
-	"google.golang.org/grpc"
 )
 
 // Injectors from wire.go:
 
-func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnStr rabbitmq.RabbitMQConnStr, grpcServer *grpc.Server) (*App, func(), error) {
+func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnStr rabbitmq.RabbitMQConnStr) (*App, func(), error) {
 	dbEngine, cleanup, err := dbEngineFunc(dbConnStr)
 	if err != nil {
 		return nil, nil, err
@@ -46,20 +40,8 @@ func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnSt
 		cleanup()
 		return nil, nil, err
 	}
-	baristaEventPublisher := infras.NewBaristaEventPublisher(eventPublisher)
-	kitchenEventPublisher := infras.NewKitchenEventPublisher(eventPublisher)
-	productDomainService, err := grpc2.NewGRPCProductClient(cfg)
-	if err != nil {
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	orderRepo := repo.NewOrderRepo(dbEngine)
-	useCase := orders.NewUseCase(orderRepo, productDomainService, baristaEventPublisher, kitchenEventPublisher)
-	counterServiceServer := router.NewGRPCCounterServer(grpcServer, cfg, useCase)
-	baristaOrderUpdatedEventHandler := handlers.NewBaristaOrderUpdatedEventHandler(orderRepo)
-	kitchenOrderUpdatedEventHandler := handlers.NewKitchenOrderUpdatedEventHandler(orderRepo)
-	app := New(cfg, dbEngine, connection, eventPublisher, eventConsumer, baristaEventPublisher, kitchenEventPublisher, productDomainService, useCase, counterServiceServer, baristaOrderUpdatedEventHandler, kitchenOrderUpdatedEventHandler)
+	kitchenOrderedEventHandler := eventhandlers.NewKitchenOrderedEventHandler(dbEngine, eventPublisher)
+	app := New(cfg, dbEngine, connection, eventPublisher, eventConsumer, kitchenOrderedEventHandler)
 	return app, func() {
 		cleanup2()
 		cleanup()

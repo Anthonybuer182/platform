@@ -5,8 +5,7 @@ import (
 )
 
 type (
-	ProductRepo interface {
-		GetAll(context.Context) ([]*ItemTypeDto, error)
-		GetByTypes(context.Context, []string) ([]*ItemDto, error)
+	ProductDomainService interface {
+		GetItemsByType(context.Context, *PlaceOrderModel, bool) ([]*ItemModel, error)
 	}
 )

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"platform/internal/order/domain"
+	"platform/internal/user/domain"
 
 	"github.com/google/wire"
 	"github.com/pkg/errors"

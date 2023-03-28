@@ -3,7 +3,7 @@ package orders
 import (
 	"context"
 
-	"platform/internal/order/domain"
+	"platform/internal/user/domain"
 	"platform/pkg/rabbitmq/publisher"
 
 	"github.com/google/uuid"

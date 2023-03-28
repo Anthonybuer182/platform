@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"platform/internal/order/domain"
-	"platform/internal/order/infras/postgresql"
-	"platform/internal/order/usecases/orders"
 	shared "platform/internal/pkg/shared_kernel"
+	"platform/internal/user/domain"
+	"platform/internal/user/infras/postgresql"
+	"platform/internal/user/usecases/orders"
 	"platform/pkg/postgres"
 
 	"github.com/google/uuid"

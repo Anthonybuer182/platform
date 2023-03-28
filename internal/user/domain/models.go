@@ -1,13 +1,28 @@
 package domain
 
-type ItemTypeDto struct {
-	Name  string  `json:"name"`
-	Type  int     `json:"type"`
-	Price float64 `json:"price"`
-	Image string  `json:"image"`
+import (
+	"time"
+
+	shared "platform/internal/pkg/shared_kernel"
+
+	"github.com/google/uuid"
+)
+
+type PlaceOrderModel struct {
+	CommandType     shared.CommandType
+	OrderSource     shared.OrderSource
+	Location        shared.Location
+	LoyaltyMemberID uuid.UUID
+	BaristaItems    []*OrderItemModel
+	KitchenItems    []*OrderItemModel
+	Timestamp       time.Time
 }
 
-type ItemDto struct {
-	Price float64 `json:"price"`
-	Type  int     `json:"type"`
+type OrderItemModel struct {
+	ItemType shared.ItemType
+}
+
+type ItemModel struct {
+	ItemType shared.ItemType
+	Price    float64
 }

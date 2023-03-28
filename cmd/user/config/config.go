@@ -5,17 +5,19 @@ import (
 	"log"
 	"os"
 
-	"github.com/ilyakaznacheev/cleanenv"
 	configs "platform/pkg/config"
+
+	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type (
 	Config struct {
-		configs.App  `yaml:"app"`
-		configs.HTTP `yaml:"http"`
-		configs.Log  `yaml:"logger"`
-		PG           `yaml:"postgres"`
-		RabbitMQ     `yaml:"rabbitmq"`
+		configs.App   `yaml:"app"`
+		configs.HTTP  `yaml:"http"`
+		configs.Log   `yaml:"logger"`
+		PG            `yaml:"postgres"`
+		RabbitMQ      `yaml:"rabbitmq"`
+		ProductClient `yaml:"product_client"`
 	}
 
 	PG struct {
@@ -25,6 +27,10 @@ type (
 
 	RabbitMQ struct {
 		URL string `env-required:"true" yaml:"url" env:"RABBITMQ_URL"`
+	}
+
+	ProductClient struct {
+		URL string `env-required:"true" yaml:"url" env:"PRODUCT_CLIENT_URL"`
 	}
 )
 
@@ -37,7 +43,7 @@ func NewConfig() (*Config, error) {
 	}
 
 	// debug
-	fmt.Println(dir)
+	fmt.Println("config path: " + dir)
 
 	err = cleanenv.ReadConfig(dir+"/config.yml", cfg)
 	if err != nil {

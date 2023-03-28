@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"platform/cmd/order/config"
-	"platform/internal/order/domain"
+	"platform/cmd/user/config"
 	shared "platform/internal/pkg/shared_kernel"
+	"platform/internal/user/domain"
 	gen "platform/proto/gen"
 
 	"github.com/google/wire"

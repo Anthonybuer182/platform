@@ -1,25 +1,138 @@
 package app
 
 import (
-	"platform/cmd/product/config"
-	productUC "platform/internal/product/usecases/products"
+	"context"
+	"encoding/json"
+
+	"platform/cmd/user/config"
+
+	"platform/internal/user/domain"
+
+	"platform/internal/user/events"
+
+	ordersUC "platform/internal/user/usecases/orders"
+
+	shared "platform/internal/pkg/event"
+
+	"platform/pkg/postgres"
+
+	pkgConsumer "platform/pkg/rabbitmq/consumer"
+	pkgPublisher "platform/pkg/rabbitmq/publisher"
+
 	"platform/proto/gen"
+
+	amqp "github.com/rabbitmq/amqp091-go"
+	"golang.org/x/exp/slog"
 )
 
 type App struct {
-	Cfg               *config.Config
-	UC                productUC.UseCase
-	ProductGRPCServer gen.ProductServiceServer
+	Cfg       *config.Config
+	PG        postgres.DBEngine
+	AMQPConn  *amqp.Connection
+	Publisher pkgPublisher.EventPublisher
+	Consumer  pkgConsumer.EventConsumer
+
+	BaristaOrderPub ordersUC.BaristaEventPublisher
+	KitchenOrderPub ordersUC.KitchenEventPublisher
+
+	ProductDomainSvc  domain.ProductDomainService
+	UC                ordersUC.UseCase
+	CounterGRPCServer gen.CounterServiceServer
+
+	baristaHandler events.BaristaOrderUpdatedEventHandler
+	kitchenHandler events.KitchenOrderUpdatedEventHandler
 }
 
 func New(
 	cfg *config.Config,
-	uc productUC.UseCase,
-	productGRPCServer gen.ProductServiceServer,
+	pg postgres.DBEngine,
+	amqpConn *amqp.Connection,
+	publisher pkgPublisher.EventPublisher,
+	consumer pkgConsumer.EventConsumer,
+
+	baristaOrderPub ordersUC.BaristaEventPublisher,
+	kitchenOrderPub ordersUC.KitchenEventPublisher,
+	productDomainSvc domain.ProductDomainService,
+	uc ordersUC.UseCase,
+	counterGRPCServer gen.CounterServiceServer,
+
+	baristaHandler events.BaristaOrderUpdatedEventHandler,
+	kitchenHandler events.KitchenOrderUpdatedEventHandler,
 ) *App {
 	return &App{
-		Cfg:               cfg,
+		Cfg: cfg,
+
+		PG:        pg,
+		AMQPConn:  amqpConn,
+		Publisher: publisher,
+		Consumer:  consumer,
+
+		BaristaOrderPub: baristaOrderPub,
+		KitchenOrderPub: kitchenOrderPub,
+
+		ProductDomainSvc:  productDomainSvc,
 		UC:                uc,
-		ProductGRPCServer: productGRPCServer,
+		CounterGRPCServer: counterGRPCServer,
+
+		baristaHandler: baristaHandler,
+		kitchenHandler: kitchenHandler,
 	}
+}
+
+func (a *App) Worker(ctx context.Context, messages <-chan amqp.Delivery) {
+	for delivery := range messages {
+		slog.Info("processDeliveries", "delivery_tag", delivery.DeliveryTag)
+		slog.Info("received", "delivery_type", delivery.Type)
+
+		switch delivery.Type {
+		case "barista-order-updated":
+			var payload shared.BaristaOrderUpdated
+
+			err := json.Unmarshal(delivery.Body, &payload)
+			if err != nil {
+				slog.Error("failed to Unmarshal message", err)
+			}
+
+			err = a.baristaHandler.Handle(ctx, &payload)
+
+			if err != nil {
+				if err = delivery.Reject(false); err != nil {
+					slog.Error("failed to delivery.Reject", err)
+				}
+
+				slog.Error("failed to process delivery", err)
+			} else {
+				err = delivery.Ack(false)
+				if err != nil {
+					slog.Error("failed to acknowledge delivery", err)
+				}
+			}
+		case "kitchen-order-updated":
+			var payload shared.KitchenOrderUpdated
+
+			err := json.Unmarshal(delivery.Body, &payload)
+			if err != nil {
+				slog.Error("failed to Unmarshal message", err)
+			}
+
+			err = a.kitchenHandler.Handle(ctx, &payload)
+
+			if err != nil {
+				if err = delivery.Reject(false); err != nil {
+					slog.Error("failed to delivery.Reject", err)
+				}
+
+				slog.Error("failed to process delivery", err)
+			} else {
+				err = delivery.Ack(false)
+				if err != nil {
+					slog.Error("failed to acknowledge delivery", err)
+				}
+			}
+		default:
+			slog.Info("default")
+		}
+	}
+
+	slog.Info("Deliveries channel closed")
 }

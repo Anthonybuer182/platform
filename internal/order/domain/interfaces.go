@@ -5,7 +5,7 @@ import (
 )
 
 type (
-	ProductDomainService interface {
-		GetItemsByType(context.Context, *PlaceOrderModel, bool) ([]*ItemModel, error)
+	OrderRepo interface {
+		Create(context.Context, *KitchenOrder) error
 	}
 )

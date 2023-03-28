@@ -1,143 +1,68 @@
 package domain
 
 import (
-	"context"
-
-	events "platform/internal/pkg/event"
-	shared "platform/internal/pkg/shared_kernel"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/samber/lo"
+	"platform/internal/pkg/event"
+	shared "platform/internal/pkg/shared_kernel"
 )
 
-type Order struct {
+type KitchenOrder struct {
 	shared.AggregateRoot
-	ID              uuid.UUID
-	OrderSource     shared.OrderSource
-	LoyaltyMemberID uuid.UUID
-	OrderStatus     shared.Status
-	Location        shared.Location
-	LineItems       []*LineItem
+	ID       uuid.UUID
+	OrderID  uuid.UUID
+	ItemName string
+	ItemType shared.ItemType
+	TimeUp   time.Time
+	Created  time.Time
+	Updated  time.Time
 }
 
-func NewOrder(
-	orderSource shared.OrderSource,
-	loyaltyMemberID uuid.UUID,
-	orderStatus shared.Status,
-	location shared.Location,
-) *Order {
-	return &Order{
-		ID:              uuid.New(),
-		OrderSource:     orderSource,
-		LoyaltyMemberID: loyaltyMemberID,
-		OrderStatus:     orderStatus,
-		Location:        location,
+func NewKitchenOrder(e event.KitchenOrdered) KitchenOrder {
+	timeIn := time.Now()
+
+	delay := calculateDelay(e.ItemType)
+	time.Sleep(delay) // simulate the delay when makes the drink
+
+	timeUp := time.Now().Add(delay)
+
+	order := KitchenOrder{
+		ID:       e.ItemLineID,
+		OrderID:  e.OrderID,
+		ItemName: e.ItemType.String(),
+		ItemType: e.ItemType,
+		TimeUp:   timeUp,
+		Created:  time.Now(),
+		Updated:  time.Now(),
 	}
+
+	orderUpdatedEvent := event.KitchenOrderUpdated{
+		OrderID:    e.OrderID,
+		ItemLineID: e.ItemLineID,
+		Name:       e.ItemType.String(),
+		ItemType:   e.ItemType,
+		MadeBy:     "teesee",
+		TimeIn:     timeIn,
+		TimeUp:     timeUp,
+	}
+
+	order.ApplyDomain(&orderUpdatedEvent)
+
+	return order
 }
 
-func CreateOrderFrom(
-	ctx context.Context,
-	request *PlaceOrderModel,
-	productDomainSvc ProductDomainService,
-) (*Order, error) {
-	order := NewOrder(request.OrderSource, request.LoyaltyMemberID, shared.StatusInProcess, request.Location)
-
-	numberOfBaristaItems := len(request.BaristaItems) > 0
-	numberOfKitchenItems := len(request.KitchenItems) > 0
-
-	if numberOfBaristaItems {
-		itemTypesRes, err := productDomainSvc.GetItemsByType(ctx, request, true)
-		if err != nil {
-			return nil, err
-		}
-
-		lo.ForEach(request.BaristaItems, func(item *OrderItemModel, _ int) {
-			find, ok := lo.Find(itemTypesRes, func(i *ItemModel) bool {
-				return i.ItemType == item.ItemType
-			})
-
-			if ok {
-				lineItem := NewLineItem(item.ItemType, item.ItemType.String(), float32(find.Price), shared.StatusInProcess, true)
-
-				event := events.BaristaOrdered{
-					OrderID:    order.ID,
-					ItemLineID: lineItem.ID,
-					ItemType:   item.ItemType,
-				}
-
-				order.ApplyDomain(event)
-
-				order.LineItems = append(order.LineItems, lineItem)
-			}
-		})
-
-		if err != nil {
-			return nil, err
-		}
+func calculateDelay(itemType shared.ItemType) time.Duration {
+	switch itemType {
+	case shared.ItemTypeCroissant:
+		return 7 * time.Second
+	case shared.ItemTypeCroissantChocolate:
+		return 7 * time.Second
+	case shared.ItemTypeCakePop:
+		return 5 * time.Second
+	case shared.ItemTypeMuffin:
+		return 7 * time.Second
+	default:
+		return 3 * time.Second
 	}
-
-	if numberOfKitchenItems {
-		itemTypesRes, err := productDomainSvc.GetItemsByType(ctx, request, false)
-		if err != nil {
-			return nil, err
-		}
-
-		lo.ForEach(request.KitchenItems, func(item *OrderItemModel, index int) {
-			find, ok := lo.Find(itemTypesRes, func(i *ItemModel) bool {
-				return i.ItemType == item.ItemType
-			})
-
-			if ok {
-				lineItem := NewLineItem(item.ItemType, item.ItemType.String(), float32(find.Price), shared.StatusInProcess, false)
-
-				event := events.KitchenOrdered{
-					OrderID:    order.ID,
-					ItemLineID: lineItem.ID,
-					ItemType:   item.ItemType,
-				}
-
-				order.ApplyDomain(event)
-
-				order.LineItems = append(order.LineItems, lineItem)
-			}
-		})
-
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return order, nil
-}
-
-func (o *Order) Apply(event *events.OrderUp) error {
-	if len(o.LineItems) == 0 {
-		return nil // we dont do anything
-	}
-
-	_, index, ok := lo.FindIndexOf(o.LineItems, func(i *LineItem) bool {
-		return i.ItemType == event.ItemType
-	})
-
-	if !ok {
-		return ErrItemNotFound
-	}
-
-	o.LineItems[index].ItemStatus = shared.StatusFulfilled
-
-	if checkFulfilledStatus(o.LineItems) {
-		o.OrderStatus = shared.StatusFulfilled
-	}
-
-	return nil
-}
-
-func checkFulfilledStatus(lineItems []*LineItem) bool {
-	for _, item := range lineItems {
-		if item.ItemStatus != shared.StatusFulfilled {
-			return false
-		}
-	}
-
-	return true
 }
