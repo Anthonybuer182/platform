@@ -11,15 +11,19 @@ lint:
       - common.proto
       - product.proto
       - user.proto
+      - order.proto
     PACKAGE_VERSION_SUFFIX:
       - common.proto
       - product.proto
       - user.proto
+      - order.proto
     RPC_REQUEST_RESPONSE_UNIQUE:
       - common.proto
       - product.proto
       - user.proto
+      - order.proto
     RPC_RESPONSE_STANDARD_NAME:
       - common.proto
       - product.proto
       - user.proto
+      - order.proto
