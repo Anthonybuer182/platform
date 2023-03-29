@@ -1,13 +1,14 @@
--- name: CreateOrder :one
+-- name: GetDeleteOrderList :many
+select
+       o.order_id,
+       o.user_id,
+       o.order_date,
+       o.amount,
+       o.order_state
+from "orders".orders o;
 
-INSERT INTO
-    kitchen.kitchen_orders (
-        id,
-        order_id,
-        item_type,
-        item_name,
-        time_up,
-        created,
-        updated
-    )
-VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;
+-- name: UpdateOrder :exec
+UPDATE "orders".orders
+SET
+    order_state = $2
+WHERE order_id = $1;

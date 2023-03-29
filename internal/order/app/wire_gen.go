@@ -8,8 +8,12 @@ package app
 
 import (
 	"github.com/rabbitmq/amqp091-go"
+	"google.golang.org/grpc"
 	"platform/cmd/order/config"
-	"platform/internal/order/eventhandlers"
+	router "platform/internal/order/app/route"
+	"platform/internal/order/eventHandle/handlers"
+	"platform/internal/order/infras/repo"
+	"platform/internal/order/usecases/order"
 	"platform/pkg/postgres"
 	"platform/pkg/rabbitmq"
 	"platform/pkg/rabbitmq/consumer"
@@ -18,7 +22,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnStr rabbitmq.RabbitMQConnStr) (*App, func(), error) {
+func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnStr rabbitmq.RabbitMQConnStr, grpcServer *grpc.Server) (*App, func(), error) {
 	dbEngine, cleanup, err := dbEngineFunc(dbConnStr)
 	if err != nil {
 		return nil, nil, err
@@ -40,8 +44,13 @@ func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnSt
 		cleanup()
 		return nil, nil, err
 	}
-	kitchenOrderedEventHandler := eventhandlers.NewKitchenOrderedEventHandler(dbEngine, eventPublisher)
-	app := New(cfg, dbEngine, connection, eventPublisher, eventConsumer, kitchenOrderedEventHandler)
+
+	orderReq := repo.NewOrderRepo(dbEngine)
+	userCase := order.NewService(orderReq)
+	orderServiceServer := router.NewOrderGRPCServer(grpcServer, userCase)
+
+	OrderedEventHandler := handlers.NewOrderedEventHandlerImpl(dbEngine, eventPublisher)
+	app := New(cfg, dbEngine, connection, eventPublisher, eventConsumer, orderServiceServer, OrderedEventHandler)
 	return app, func() {
 		cleanup2()
 		cleanup()

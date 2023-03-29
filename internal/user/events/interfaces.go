@@ -12,6 +12,6 @@ type (
 	}
 
 	KitchenOrderUpdatedEventHandler interface {
-		Handle(context.Context, *event.KitchenOrderUpdated) error
+		Handle(context.Context, *event.OrderUpdated) error
 	}
 )

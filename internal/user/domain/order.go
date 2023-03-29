@@ -90,7 +90,7 @@ func CreateOrderFrom(
 			if ok {
 				lineItem := NewLineItem(item.ItemType, item.ItemType.String(), float32(find.Price), shared.StatusInProcess, false)
 
-				event := events.KitchenOrdered{
+				event := events.Ordered{
 					OrderID:    order.ID,
 					ItemLineID: lineItem.ID,
 					ItemType:   item.ItemType,

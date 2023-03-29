@@ -1,5 +1,5 @@
 app:
-  name: 'kitchen-service'
+  name: 'order-service'
   version: '1.0.0'
 
 http:
@@ -15,4 +15,4 @@ rabbitmq:
 
 logger:
   log_level: 'debug'
-  rollbar_env: 'kitchen-service'
+  rollbar_env: 'order-service'

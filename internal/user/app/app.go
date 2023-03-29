@@ -108,7 +108,7 @@ func (a *App) Worker(ctx context.Context, messages <-chan amqp.Delivery) {
 				}
 			}
 		case "kitchen-order-updated":
-			var payload shared.KitchenOrderUpdated
+			var payload shared.OrderUpdated
 
 			err := json.Unmarshal(delivery.Body, &payload)
 			if err != nil {

@@ -7,7 +7,7 @@ import (
 	"github.com/google/wire"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"platform/cmd/order/config"
-	"platform/internal/order/eventhandlers"
+	"platform/internal/order/eventHandle"
 	"platform/pkg/postgres"
 	"platform/pkg/rabbitmq"
 	pkgConsumer "platform/pkg/rabbitmq/consumer"
@@ -25,7 +25,7 @@ func InitApp(
 		rabbitMQFunc,
 		pkgPublisher.EventPublisherSet,
 		pkgConsumer.EventConsumerSet,
-		eventhandlers.KitchenOrderedEventHandlerSet,
+		eventHandle.KitchenOrderedEventHandlerSet,
 	))
 }
 

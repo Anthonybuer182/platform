@@ -1,4 +1,4 @@
-package domain
+package order
 
 import (
 	"context"
@@ -6,8 +6,11 @@ import (
 )
 
 type (
-	//获取删除订单的信息
-	OrderRepo interface {
+	OrdersRepo interface {
 		GetListDeleteOrders(context.Context) ([]*entity.Order, error)
+	}
+
+	UseCase interface {
+		DeleteOrder(context.Context, string) error
 	}
 )

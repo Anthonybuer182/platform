@@ -25,7 +25,7 @@ func NewKitchenOrderUpdatedEventHandler(orderRepo orders.OrderRepo) events.Kitch
 	}
 }
 
-func (h *kitchenOrderUpdatedEventHandler) Handle(ctx context.Context, e *event.KitchenOrderUpdated) error {
+func (h *kitchenOrderUpdatedEventHandler) Handle(ctx context.Context, e *event.OrderUpdated) error {
 	order, err := h.orderRepo.GetByID(ctx, e.OrderID)
 	if err != nil {
 		return errors.Wrap(err, "orderRepo.GetOrderByID")

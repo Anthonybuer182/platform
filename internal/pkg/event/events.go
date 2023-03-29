@@ -1,74 +1,25 @@
 package event
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 
 	shared "platform/internal/pkg/shared_kernel"
 )
 
-type BaristaOrdered struct {
+type Ordered struct {
 	shared.DomainEvent
-	OrderID    uuid.UUID       `json:"orderId"`
-	ItemLineID uuid.UUID       `json:"itemLineId"`
-	ItemType   shared.ItemType `json:"itemType"`
+	OrderID     int32     `json:"orderId"`
+	ItemLineID  uuid.UUID `json:"itemLineId"`
+	OrderStatus string    `json:"orderStatus"`
+	Amount      float32   `json:"amount"`
 }
 
-func (e BaristaOrdered) Identity() string {
-	return "BaristaOrdered"
+func (e Ordered) Identity() string {
+	return "Ordered"
 }
 
-type KitchenOrdered struct {
+type OrderDeleted struct {
 	shared.DomainEvent
-	OrderID    uuid.UUID       `json:"orderId"`
-	ItemLineID uuid.UUID       `json:"itemLineId"`
-	ItemType   shared.ItemType `json:"itemType"`
-}
-
-func (e KitchenOrdered) Identity() string {
-	return "KitchenOrdered"
-}
-
-type BaristaOrderUpdated struct {
-	shared.DomainEvent
-	OrderID    uuid.UUID       `json:"orderId"`
-	ItemLineID uuid.UUID       `json:"itemLineId"`
-	Name       string          `json:"name"`
-	ItemType   shared.ItemType `json:"itemType"`
-	TimeIn     time.Time       `json:"timeIn"`
-	MadeBy     string          `json:"madeBy"`
-	TimeUp     time.Time       `json:"timeUp"`
-}
-
-func (e *BaristaOrderUpdated) Identity() string {
-	return "BaristaOrderUpdated"
-}
-
-type KitchenOrderUpdated struct {
-	shared.DomainEvent
-	OrderID    uuid.UUID       `json:"orderId"`
-	ItemLineID uuid.UUID       `json:"itemLineId"`
-	Name       string          `json:"name"`
-	ItemType   shared.ItemType `json:"itemType"`
-	TimeIn     time.Time       `json:"timeIn"`
-	MadeBy     string          `json:"madeBy"`
-	TimeUp     time.Time       `json:"timeUp"`
-}
-
-func (e *KitchenOrderUpdated) Identity() string {
-	return "KitchenOrderUpdated"
-}
-
-type OrderUp struct {
-	OrderID    uuid.UUID       `json:"orderId"`
-	ItemLineID uuid.UUID       `json:"itemLineId"`
-	Name       string          `json:"name"`
-	ItemType   shared.ItemType `json:"itemType"`
-	TimeUp     time.Time       `json:"timeUp"`
-	MadeBy     string          `json:"madeBy"`
-}
-
-func (e *OrderUp) Identity() string {
-	return "OrderUp"
+	OrderId     int32  `json:"orderId"`
+	OrderStatus string `json:"orderStatus"`
 }

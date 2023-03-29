@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -46,13 +48,20 @@ func main() {
 	// integrate Logrus with the slog logger
 	slog.New(logger.NewLogrusHandler(logrus.StandardLogger()))
 
-	a, cleanup, err := app.InitApp(cfg, postgres.DBConnString(cfg.PG.DsnURL), rabbitmq.RabbitMQConnStr(cfg.RabbitMQ.URL))
+	server := grpc.NewServer()
+
+	go func() {
+		defer server.GracefulStop()
+		<-ctx.Done()
+	}()
+
+	a, cleanup, err := app.InitApp(cfg, postgres.DBConnString(cfg.PG.DsnURL), rabbitmq.RabbitMQConnStr(cfg.RabbitMQ.URL), server)
 	if err != nil {
 		slog.Error("failed init app", err)
 		cancel()
 	}
 
-	a.CounterOrderPub.Configure(
+	a.OrderPub.Configure(
 		pkgPublisher.ExchangeName("counter-order-exchange"),
 		pkgPublisher.BindingKey("counter-order-routing-key"),
 		pkgPublisher.MessageTypeName("kitchen-order-updated"),
@@ -74,6 +83,33 @@ func main() {
 			cancel()
 		}
 	}()
+
+	// gRPC Server.
+	address := fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port)
+	network := "tcp"
+
+	l, err := net.Listen(network, address)
+	if err != nil {
+		slog.Error("failed to listen to address", err, "network", network, "address", address)
+		cancel()
+		<-ctx.Done()
+	}
+
+	slog.Info("🌏 start server...", "address", address)
+
+	defer func() {
+		if err1 := l.Close(); err != nil {
+			slog.Error("failed to close", err1, "network", network, "address", address)
+			<-ctx.Done()
+		}
+	}()
+
+	err = server.Serve(l)
+	if err != nil {
+		slog.Error("failed start gRPC server", err, "network", network, "address", address)
+		cancel()
+		<-ctx.Done()
+	}
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
