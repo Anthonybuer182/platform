@@ -6,7 +6,7 @@ import (
 
 type OrderDetails struct {
 	ID       uuid.UUID
-	OrderID  uuid.UUID   // shadow field
+	OrderID  string      // shadow field
 	Products []*Products // shadow field
 	Quantity int
 	Price    float32

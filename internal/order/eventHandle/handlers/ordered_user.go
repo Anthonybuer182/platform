@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"platform/internal/order/domain/entity"
 	event2 "platform/internal/order/eventHandle"
+	"strconv"
 
 	"github.com/google/wire"
 	"github.com/pkg/errors"
@@ -49,8 +50,10 @@ func (h *OrderedEventHandlerImpl) Handle(ctx context.Context, e event.Ordered) e
 
 	qtx := querier.WithTx(tx)
 
+	orderId, _ := strconv.Atoi(e.OrderID)
+	orderids := int32(orderId)
 	err = qtx.UpdateOrder(ctx, postgresql.UpdateOrderParams{
-		OrderID:    e.OrderID,
+		OrderID:    orderids,
 		OrderState: e.OrderStatus,
 	})
 	if err != nil {

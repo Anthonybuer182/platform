@@ -2,17 +2,12 @@ package repo
 
 import (
 	"context"
+	"github.com/google/wire"
 	"github.com/pkg/errors"
-	"github.com/samber/lo"
-	"platform/internal/order/domain"
 	"platform/internal/order/domain/entity"
 	"platform/internal/order/infras/postgresql"
 	"platform/internal/order/usecases/order"
-	shared "platform/internal/pkg/shared_kernel"
 	"platform/pkg/postgres"
-	"strconv"
-
-	"github.com/google/wire"
 )
 
 type OrderRepo struct {
@@ -40,9 +35,12 @@ func (o *OrderRepo) GetListDeleteOrders(ctx context.Context) ([]*entity.Order, e
 	}
 
 	for _, item := range results {
-		order := &entity.Order{}
+		order := &entity.Order{
+			OrderId:     string(item.OrderID),
+			OrderStatus: item.OrderState,
+		}
 		entities = append(entities, order)
 	}
 
-	return results, nil
+	return entities, nil
 }

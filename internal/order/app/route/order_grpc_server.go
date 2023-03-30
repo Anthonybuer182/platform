@@ -51,8 +51,8 @@ func (g *OrderGRPCServer) GetListDeleteOrders(
 
 	for _, item := range results {
 		res.Orders = append(res.Orders, &gen.OrderDto{
-			OrderNum:    item.ItemName,
-			OrderStatus: "",
+			OrderNum:    item.OrderId,
+			OrderStatus: item.OrderStatus,
 			Products:    nil,
 			Users:       nil,
 		})

@@ -12,6 +12,7 @@ import (
 type Order struct {
 	shared.AggregateRoot
 	ID          uuid.UUID
+	OrderId     string
 	OrderStatus string
 	Amount      float32
 	Orderdate   time.Time
