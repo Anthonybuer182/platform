@@ -1,28 +1,20 @@
 package domain
 
-import (
-	"time"
-
-	shared "platform/internal/pkg/shared_kernel"
-
-	"github.com/google/uuid"
-)
-
-type PlaceOrderModel struct {
-	CommandType     shared.CommandType
-	OrderSource     shared.OrderSource
-	Location        shared.Location
-	LoyaltyMemberID uuid.UUID
-	BaristaItems    []*OrderItemModel
-	KitchenItems    []*OrderItemModel
-	Timestamp       time.Time
+type ItemTypeDto struct {
+	Name  string  `json:"name"`
+	Type  int     `json:"type"`
+	Price float64 `json:"price"`
+	Image string  `json:"image"`
 }
 
-type OrderItemModel struct {
-	ItemType shared.ItemType
+type ItemDto struct {
+	Price float64 `json:"price"`
+	Type  int     `json:"type"`
 }
-
-type ItemModel struct {
-	ItemType shared.ItemType
-	Price    float64
+type OrderDto struct {
+	Id          int     `json:"id"`
+	ProductId   int     `json:"productId"`
+	PruductName string  `json:"pruductName"`
+	Type        int     `json:"type"`
+	Price       float64 `json:"price"`
 }

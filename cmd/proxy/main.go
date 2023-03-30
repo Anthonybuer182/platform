@@ -31,7 +31,7 @@ func newGateway(
 	mux := gwruntime.NewServeMux(opts...)
 	dialOpts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
-	err := gen.RegisterProductServiceHandlerFromEndpoint(ctx, mux, productEndpoint, dialOpts)
+	err := gen.RegisterUserServiceHandlerFromEndpoint(ctx, mux, productEndpoint, dialOpts)
 	if err != nil {
 		return nil, err
 	}

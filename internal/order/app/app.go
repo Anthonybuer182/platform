@@ -3,12 +3,11 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"platform/internal/order/eventHandle"
-	"platform/proto/gen"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"golang.org/x/exp/slog"
 	"platform/cmd/order/config"
+	"platform/internal/order/eventhandlers"
 	"platform/internal/pkg/event"
 	"platform/pkg/postgres"
 	pkgConsumer "platform/pkg/rabbitmq/consumer"
@@ -21,10 +20,10 @@ type App struct {
 	PG       postgres.DBEngine
 	AMQPConn *amqp.Connection
 
-	OrderPub        pkgPublisher.EventPublisher
+	CounterOrderPub pkgPublisher.EventPublisher
 	Consumer        pkgConsumer.EventConsumer
-	OrderGRPCServer gen.OrderServiceServer
-	handler         eventHandle.OrderedEventHandler
+
+	handler eventhandlers.KitchenOrderedEventHandler
 }
 
 func New(
@@ -33,17 +32,17 @@ func New(
 	amqpConn *amqp.Connection,
 	counterOrderPub pkgPublisher.EventPublisher,
 	consumer pkgConsumer.EventConsumer,
-	orderGRPCServer gen.OrderServiceServer,
-	handler eventHandle.OrderedEventHandler,
+	handler eventhandlers.KitchenOrderedEventHandler,
 ) *App {
 	return &App{
-		Cfg:             cfg,
-		PG:              pg,
-		AMQPConn:        amqpConn,
-		OrderPub:        counterOrderPub,
+		Cfg:      cfg,
+		PG:       pg,
+		AMQPConn: amqpConn,
+
+		CounterOrderPub: counterOrderPub,
 		Consumer:        consumer,
-		OrderGRPCServer: orderGRPCServer,
-		handler:         handler,
+
+		handler: handler,
 	}
 }
 
@@ -54,7 +53,7 @@ func (c *App) Worker(ctx context.Context, messages <-chan amqp.Delivery) {
 
 		switch delivery.Type {
 		case "kitchen-order-created":
-			var payload event.Ordered
+			var payload event.KitchenOrdered
 			err := json.Unmarshal(delivery.Body, &payload)
 
 			if err != nil {

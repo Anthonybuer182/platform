@@ -1,72 +1,97 @@
 syntax="proto3";
 
-package go.coffeeshop.proto.counterapi;
+package platform.proto.productapi;
 
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
-import "google/protobuf/timestamp.proto";
 import "common.proto";
 
 option go_package = "github.com/thangchung/go-coffeeshop/proto/gen";
 
-service CounterService {
-    rpc GetListOrderFulfillment(GetListOrderFulfillmentRequest) returns (GetListOrderFulfillmentResponse) {
-        option (google.api.http) = {
-            get: "/v1/fulfillment-orders"
-        };
-        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            summary: "List order fulfillment"
-            description: "List order fulfillment on the server."
-            tags: "Orders"
-        };
-    }
-    rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse) {
-        option (google.api.http) = {
-            post: "/v1/api/orders"
-            body: "*"
-        };
-        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
-            summary: "Place an order"
-            description: "Place an order on the server."
-            tags: "Orders"
-        };
-    }
+service UserService {
+  rpc GetItemTypes(GetItemTypesRequest) returns (GetItemTypesResponse) {
+    option (google.api.http) = {
+      get: "/v1/api/item-types"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List item types"
+      description: "List all item types on the server."
+      tags: "ItemTypes"
+    };
+  }
+
+  rpc GetItemsByType(GetItemsByTypeRequest) returns (GetItemsByTypeResponse) {
+    option (google.api.http) = {
+      get: "/v1/api/items-by-types/{item_types}"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "List items by type"
+      description: "List items by type on the server."
+      tags: "ItemTypes"
+    };
+  }
+
+  rpc GetDeletedOrders(GetDeletedOrdersRequest) returns (GetDeletedOrdersResponse) {
+    option (google.api.http) = {
+      get: "/v1/api/deleted-orders"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "获取删除的订单"
+      description: "删除订单"
+      tags: "订单"
+    };
+  }
+  rpc DeleteOrders(DeleteOrdersRequest) returns (DeleteOrdersResponse) {
+    option (google.api.http) = {
+      post: "/v1/api/delete-orders"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "删除的订单"
+      description: "删除订单"
+      tags: "订单"
+    };
+  }
 }
 
-message GetListOrderFulfillmentRequest {}
-message GetListOrderFulfillmentResponse {
-  repeated OrderDto orders = 1;
+message GetDeletedOrdersRequest{}
+message GetDeletedOrdersResponse {
+  repeated OrdersDto orders = 1;
+
+}
+message DeleteOrdersRequest{
+  int32 id=1;
+}
+message DeleteOrdersResponse {
+   bool sunccess = 1;
 }
 
-message OrderDto {
-    string id = 1;
-    int32 order_source = 2;
-    string loyalty_member_id = 3;
-    int32 order_status = 4;
-    int32 localtion = 5;
-    repeated LineItemDto line_items = 6;
+message GetItemTypesRequest {}
+message GetItemTypesResponse {
+  repeated ItemTypeDto item_types = 1;
 }
 
-message LineItemDto {
-    string id = 1;
-    int32 item_type = 2;
-    string name = 3;
-    double price = 4;
-    int32 item_status = 5;
-    bool is_barista_order = 6;
+message GetItemsByTypeRequest{
+  string item_types = 1;
+}
+message GetItemsByTypeResponse{
+  repeated ItemDto items = 1;
 }
 
-message PlaceOrderRequest {
-    int32 command_type = 1;
-    int32 order_source = 2;
-    int32 location = 3;
-    string loyalty_member_id = 4;
-    repeated CommandItem barista_items = 5;
-    repeated CommandItem kitchen_items = 6;
-    google.protobuf.Timestamp timestamp = 7;
+message ItemDto {
+  double price = 1;
+  int32 type = 2;
 }
-message PlaceOrderResponse {}
 
-message CommandItem {
-    int32 item_type = 1;
+message ItemTypeDto {
+  string name = 1;
+  int32 type = 2;
+  double price = 3;
+  string image = 4;
+}
+message OrdersDto {
+  int32 id =1;
+  int32 pruduct_id = 2;
+  string pruduct_name = 3;
+  int32 type = 4;
+  double price = 5;
 }

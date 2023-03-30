@@ -12,25 +12,9 @@ import (
 
 type (
 	Config struct {
-		configs.App   `yaml:"app"`
-		configs.HTTP  `yaml:"http"`
-		configs.Log   `yaml:"logger"`
-		PG            `yaml:"postgres"`
-		RabbitMQ      `yaml:"rabbitmq"`
-		ProductClient `yaml:"product_client"`
-	}
-
-	PG struct {
-		PoolMax int    `env-required:"true" yaml:"pool_max" env:"PG_POOL_MAX"`
-		DsnURL  string `env-required:"true" yaml:"dsn_url" env:"PG_DSN_URL"`
-	}
-
-	RabbitMQ struct {
-		URL string `env-required:"true" yaml:"url" env:"RABBITMQ_URL"`
-	}
-
-	ProductClient struct {
-		URL string `env-required:"true" yaml:"url" env:"PRODUCT_CLIENT_URL"`
+		configs.App  `yaml:"app"`
+		configs.HTTP `yaml:"http"`
+		configs.Log  `yaml:"logger"`
 	}
 )
 
@@ -43,7 +27,7 @@ func NewConfig() (*Config, error) {
 	}
 
 	// debug
-	fmt.Println("config path: " + dir)
+	fmt.Println(dir)
 
 	err = cleanenv.ReadConfig(dir+"/config.yml", cfg)
 	if err != nil {

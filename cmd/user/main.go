@@ -11,18 +11,11 @@ import (
 	"platform/cmd/user/config"
 	"platform/internal/user/app"
 	"platform/pkg/logger"
-	"platform/pkg/postgres"
-	"platform/pkg/rabbitmq"
 
 	"github.com/sirupsen/logrus"
 	"go.uber.org/automaxprocs/maxprocs"
 	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
-
-	pkgConsumer "platform/pkg/rabbitmq/consumer"
-	pkgPublisher "platform/pkg/rabbitmq/publisher"
-
-	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -56,7 +49,11 @@ func main() {
 		<-ctx.Done()
 	}()
 
-	cleanup := prepareApp(ctx, cancel, cfg, server)
+	_, err = app.InitApp(cfg, server)
+	if err != nil {
+		slog.Error("failed init app", err)
+		cancel()
+	}
 
 	// gRPC Server.
 	address := fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port)
@@ -66,7 +63,6 @@ func main() {
 	if err != nil {
 		slog.Error("failed to listen to address", err, "network", network, "address", address)
 		cancel()
-		<-ctx.Done()
 	}
 
 	slog.Info("🌏 start server...", "address", address)
@@ -74,7 +70,6 @@ func main() {
 	defer func() {
 		if err1 := l.Close(); err != nil {
 			slog.Error("failed to close", err1, "network", network, "address", address)
-			<-ctx.Done()
 		}
 	}()
 
@@ -82,7 +77,6 @@ func main() {
 	if err != nil {
 		slog.Error("failed start gRPC server", err, "network", network, "address", address)
 		cancel()
-		<-ctx.Done()
 	}
 
 	quit := make(chan os.Signal, 1)
@@ -90,49 +84,8 @@ func main() {
 
 	select {
 	case v := <-quit:
-		cleanup()
 		slog.Info("signal.Notify", v)
 	case done := <-ctx.Done():
-		cleanup()
-		slog.Info("ctx.Done", "app done", done)
+		slog.Info("ctx.Done", done)
 	}
-}
-
-func prepareApp(ctx context.Context, cancel context.CancelFunc, cfg *config.Config, server *grpc.Server) func() {
-	a, cleanup, err := app.InitApp(cfg, postgres.DBConnString(cfg.PG.DsnURL), rabbitmq.RabbitMQConnStr(cfg.RabbitMQ.URL), server)
-	if err != nil {
-		slog.Error("failed init app", err)
-		cancel()
-		<-ctx.Done()
-	}
-
-	a.BaristaOrderPub.Configure(
-		pkgPublisher.ExchangeName("barista-order-exchange"),
-		pkgPublisher.BindingKey("barista-order-routing-key"),
-		pkgPublisher.MessageTypeName("barista-order-created"),
-	)
-
-	a.KitchenOrderPub.Configure(
-		pkgPublisher.ExchangeName("kitchen-order-exchange"),
-		pkgPublisher.BindingKey("kitchen-order-routing-key"),
-		pkgPublisher.MessageTypeName("kitchen-order-created"),
-	)
-
-	a.Consumer.Configure(
-		pkgConsumer.ExchangeName("counter-order-exchange"),
-		pkgConsumer.QueueName("counter-order-queue"),
-		pkgConsumer.BindingKey("counter-order-routing-key"),
-		pkgConsumer.ConsumerTag("counter-order-consumer"),
-	)
-
-	go func() {
-		err1 := a.Consumer.StartConsumer(a.Worker)
-		if err1 != nil {
-			slog.Error("failed to start Consumer", err1)
-			cancel()
-			<-ctx.Done()
-		}
-	}()
-
-	return cleanup
 }
