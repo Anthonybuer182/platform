@@ -26,17 +26,11 @@ func newGateway(
 	opts []gwruntime.ServeMuxOption,
 ) (http.Handler, error) {
 	productEndpoint := fmt.Sprintf("%s:%d", cfg.ProductHost, cfg.ProductPort)
-	counterEndpoint := fmt.Sprintf("%s:%d", cfg.CounterHost, cfg.CounterPort)
 
 	mux := gwruntime.NewServeMux(opts...)
 	dialOpts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
 
 	err := gen.RegisterUserServiceHandlerFromEndpoint(ctx, mux, productEndpoint, dialOpts)
-	if err != nil {
-		return nil, err
-	}
-
-	err = gen.RegisterCounterServiceHandlerFromEndpoint(ctx, mux, counterEndpoint, dialOpts)
 	if err != nil {
 		return nil, err
 	}
