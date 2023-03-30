@@ -10,3 +10,8 @@ type (
 		GetByTypes(context.Context, []string) ([]*ItemDto, error)
 	}
 )
+type (
+	OrderDomainService interface {
+		GetDeletedOreders(context.Context, *PlaceOrderModel, bool) ([]*ItemModel, error)
+	}
+)

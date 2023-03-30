@@ -15,6 +15,10 @@ type (
 		configs.App  `yaml:"app"`
 		configs.HTTP `yaml:"http"`
 		configs.Log  `yaml:"logger"`
+		OrderClient  `yaml:"order_client"`
+	}
+	OrderClient struct {
+		URL string `env-required:"true" yaml:"url" env:"ORDER_CLIENT_URL"`
 	}
 )
 

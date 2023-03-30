@@ -2,6 +2,7 @@ package products
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"platform/internal/user/domain"
@@ -12,21 +13,27 @@ import (
 
 var _ UseCase = (*service)(nil)
 
-var UseCaseSet = wire.NewSet(NewService)
+var UseCaseSet = wire.NewSet(NewUseCase)
 
 type service struct {
-	repo domain.ProductRepo
+	repo           domain.ProductRepo
+	orderDomainSvc domain.OrderDomainService
 }
 
-func NewService(repo domain.ProductRepo) UseCase {
+func NewUseCase(repo domain.ProductRepo, orderDomainSvc domain.OrderDomainService) UseCase {
 	return &service{
-		repo: repo,
+		repo:           repo,
+		orderDomainSvc: orderDomainSvc,
 	}
 }
 
 func (s *service) GetDeletedOrder(ctx context.Context) ([]*domain.OrderDto, error) {
 	// 基于rpc调用order服务获取已删除订单列表
+	model := domain.PlaceOrderModel{}
+	deletedOrders, err := s.orderDomainSvc.GetDeletedOreders(ctx, &model, true)
+	fmt.Println(deletedOrders, err)
 
+	//mock数据
 	order1 := domain.OrderDto{
 		Id:          121,
 		ProductId:   212,
@@ -35,12 +42,6 @@ func (s *service) GetDeletedOrder(ctx context.Context) ([]*domain.OrderDto, erro
 		Price:       6000,
 	}
 	orders := []*domain.OrderDto{&order1}
-
-	// results, err := s.repo.GetAll(ctx)
-	// if err != nil {
-	// 	return nil, errors.Wrap(err, "service.GetItemTypes")
-	// }
-
 	return orders, nil
 }
 func (s *service) DeleteOrder(ctx context.Context) ([]*bool, error) {

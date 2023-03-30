@@ -1,5 +1,9 @@
 package domain
 
+import (
+	shared "platform/internal/pkg/shared_kernel"
+)
+
 type ItemTypeDto struct {
 	Name  string  `json:"name"`
 	Type  int     `json:"type"`
@@ -17,4 +21,16 @@ type OrderDto struct {
 	PruductName string  `json:"pruductName"`
 	Type        int     `json:"type"`
 	Price       float64 `json:"price"`
+}
+
+// rpc调用order
+type PlaceOrderModel struct {
+	users []string
+}
+
+type ItemModel struct {
+	Id       string
+	OrderNum string
+	ItemType shared.ItemType
+	Price    float64
 }
