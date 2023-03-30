@@ -1,9 +1,5 @@
 package domain
 
-import (
-	shared "platform/internal/pkg/shared_kernel"
-)
-
 type ItemTypeDto struct {
 	Name  string  `json:"name"`
 	Type  int     `json:"type"`
@@ -31,6 +27,4 @@ type PlaceOrderModel struct {
 type ItemModel struct {
 	Id       string
 	OrderNum string
-	ItemType shared.ItemType
-	Price    float64
 }

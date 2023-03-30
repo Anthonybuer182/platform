@@ -3,7 +3,7 @@ package router
 import (
 	"context"
 
-	"platform/internal/user/usecases/products"
+	"platform/internal/user/usecases/users"
 	"platform/proto/gen"
 
 	"github.com/google/wire"
@@ -19,12 +19,12 @@ var ProductGRPCServerSet = wire.NewSet(NewProductGRPCServer)
 
 type productGRPCServer struct {
 	gen.UnimplementedUserServiceServer
-	uc products.UseCase
+	uc users.UseCase
 }
 
 func NewProductGRPCServer(
 	grpcServer *grpc.Server,
-	uc products.UseCase,
+	uc users.UseCase,
 ) gen.UserServiceServer {
 	svc := productGRPCServer{
 		uc: uc,

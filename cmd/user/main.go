@@ -11,6 +11,7 @@ import (
 	"platform/cmd/user/config"
 	"platform/internal/user/app"
 	"platform/pkg/logger"
+	"platform/pkg/rabbitmq"
 
 	"github.com/sirupsen/logrus"
 	"go.uber.org/automaxprocs/maxprocs"
@@ -49,7 +50,7 @@ func main() {
 		<-ctx.Done()
 	}()
 
-	_, err = app.InitApp(cfg, server)
+	_, err = app.InitApp(cfg, rabbitmq.RabbitMQConnStr(cfg.RabbitMQ.URL), server)
 	if err != nil {
 		slog.Error("failed init app", err)
 		cancel()

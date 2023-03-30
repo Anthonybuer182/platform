@@ -2,7 +2,7 @@ package app
 
 import (
 	"platform/cmd/user/config"
-	productUC "platform/internal/user/usecases/products"
+	productUC "platform/internal/user/usecases/users"
 	"platform/proto/gen"
 )
 

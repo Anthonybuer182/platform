@@ -54,7 +54,7 @@ func (p *orderGRPCClient) GetDeletedOreders(
 	// res, err := c.GetListDeleteOrders(ctx, &gen.GetListDeleteOrdersRequest{ItemTypes: strings.TrimLeft(itemTypes, ",")})
 	res, err := c.GetListDeleteOrders(ctx, &gen.GetListDeleteOrdersRequest{})
 	if err != nil {
-		return nil, errors.Wrap(err, "productGRPCClient-c.GetItemsByType")
+		return nil, errors.Wrap(err, "orderGRPCClient-c.GetListDeleteOrders")
 	}
 
 	results := make([]*domain.ItemModel, 0)

@@ -1,4 +1,4 @@
-package products
+package users
 
 import (
 	"context"
@@ -18,12 +18,14 @@ var UseCaseSet = wire.NewSet(NewUseCase)
 type service struct {
 	repo           domain.ProductRepo
 	orderDomainSvc domain.OrderDomainService
+	orderEventPub  OrderEventPublisher
 }
 
-func NewUseCase(repo domain.ProductRepo, orderDomainSvc domain.OrderDomainService) UseCase {
+func NewUseCase(repo domain.ProductRepo, orderDomainSvc domain.OrderDomainService, orderEventPub OrderEventPublisher) UseCase {
 	return &service{
 		repo:           repo,
 		orderDomainSvc: orderDomainSvc,
+		orderEventPub:  orderEventPub,
 	}
 }
 

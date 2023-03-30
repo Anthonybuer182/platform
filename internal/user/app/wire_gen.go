@@ -7,28 +7,48 @@
 package app
 
 import (
+	"github.com/rabbitmq/amqp091-go"
 	"platform/cmd/user/config"
 	"platform/internal/user/app/router"
 	"platform/internal/user/infras/repo"
-	"platform/internal/user/usecases/products"
+	"platform/internal/user/usecases/users"
+	"platform/internal/user/domain/event/publish"
 	"google.golang.org/grpc"
+	"platform/pkg/rabbitmq/publisher"
+	"platform/pkg/rabbitmq"
 	grpc2 "platform/internal/user/infras/grpc"
 )
 
 // Injectors from wire.go:
 
-func InitApp(cfg *config.Config, grpcServer *grpc.Server) (*App, error) {
+func InitApp(cfg *config.Config,rabbitMQConnStr rabbitmq.RabbitMQConnStr, grpcServer *grpc.Server) (*App, error) {
 	// rpc 调用注入 start
 	productDomainService, err := grpc2.NewGRPCOrderClient(cfg)
 	if err != nil {
 		return nil, err
 	}
-
-
+	// mq 注入到用例中
+	connection,close, err := rabbitMQFunc(rabbitMQConnStr)
+	if err != nil {
+		close()
+		return nil, err
+	}
+	eventPublisher, err := publisher.NewPublisher(connection)
+	if err != nil {
+		return nil,  err
+	}
+	orderEventPublisher := publish.NewOrderEventPublisher(eventPublisher)
 	productRepo := repo.NewOrderRepo()
 	// rpc 调用注入到用例中
-	useCase := products.NewUseCase(productRepo,productDomainService)
+	useCase := users.NewUseCase(productRepo,productDomainService,orderEventPublisher)
 	productServiceServer := router.NewProductGRPCServer(grpcServer, useCase)
 	app := New(cfg, useCase, productServiceServer)
 	return app, nil
+}
+func rabbitMQFunc(url rabbitmq.RabbitMQConnStr) (*amqp091.Connection,func(), error) {
+	conn, err := rabbitmq.NewRabbitMQConn(url)
+	if err != nil {
+		return nil,nil, err
+	}
+	return conn, func() { conn.Close() }, nil
 }

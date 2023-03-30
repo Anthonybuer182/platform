@@ -30,3 +30,6 @@ go.work
 
 .terraform
 *tfstate*
+.DS_Store
+*/.DS_Store
+*/__debug_bin

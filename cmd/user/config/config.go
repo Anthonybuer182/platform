@@ -15,10 +15,14 @@ type (
 		configs.App  `yaml:"app"`
 		configs.HTTP `yaml:"http"`
 		configs.Log  `yaml:"logger"`
+		RabbitMQ     `yaml:"rabbitmq"`
 		OrderClient  `yaml:"order_client"`
 	}
 	OrderClient struct {
 		URL string `env-required:"true" yaml:"url" env:"ORDER_CLIENT_URL"`
+	}
+	RabbitMQ struct {
+		URL string `env-required:"true" yaml:"url" env:"RABBITMQ_URL"`
 	}
 )
 

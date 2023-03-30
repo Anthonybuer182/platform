@@ -7,8 +7,11 @@ http:
   port: 5001
 
 order_client:
-  url: 0.0.0.0:5001
+  url: 0.0.0.0:5004
 
 logger:
   log_level: 'debug'
   rollbar_env: 'user-service'
+
+rabbitmq:
+  url: amqp://guest:guest@127.0.0.1:5672/

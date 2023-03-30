@@ -1,9 +1,17 @@
-package products
+package users
 
 import (
 	"context"
 
 	"platform/internal/user/domain"
+	"platform/pkg/rabbitmq/publisher"
+)
+
+type (
+	OrderEventPublisher interface {
+		Configure(...publisher.Option)
+		Publish(context.Context, []byte, string) error
+	}
 )
 
 type UseCase interface {
