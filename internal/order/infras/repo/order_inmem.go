@@ -4,27 +4,27 @@ import (
 	"context"
 	"github.com/google/wire"
 	"github.com/pkg/errors"
+	"platform/internal/order/domain"
 	"platform/internal/order/domain/entity"
 	"platform/internal/order/infras/postgresql"
-	"platform/internal/order/usecases/order"
 	"platform/pkg/postgres"
 )
 
-type OrderRepo struct {
+type DomainOrderRepo struct {
 	pg postgres.DBEngine
 }
 
-var _ order.OrdersRepo = (*OrderRepo)(nil)
+var _ domain.DomainOrderRepo = (*DomainOrderRepo)(nil)
 
 var RepositorySet = wire.NewSet(NewOrderRepo)
 
-func NewOrderRepo(pg postgres.DBEngine) order.OrdersRepo {
-	return &OrderRepo{
+func NewOrderRepo(pg postgres.DBEngine) domain.DomainOrderRepo {
+	return &DomainOrderRepo{
 		pg: pg,
 	}
 }
 
-func (o *OrderRepo) GetListDeleteOrders(ctx context.Context) ([]*entity.Order, error) {
+func (o *DomainOrderRepo) GetListDeleteOrders(ctx context.Context) ([]*entity.Order, error) {
 	entities := make([]*entity.Order, 0)
 	//todo
 	querier := postgresql.New(o.pg.GetDB())
