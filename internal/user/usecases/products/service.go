@@ -44,6 +44,7 @@ func (s *service) GetDeletedOrder(ctx context.Context) ([]*domain.OrderDto, erro
 	return orders, nil
 }
 func (s *service) DeleteOrder(ctx context.Context) ([]*bool, error) {
+	// 基于mq 发布订阅删除订单
 	// results, err := s.repo.GetAll(ctx)
 	// if err != nil {
 	// 	return nil, errors.Wrap(err, "service.GetItemTypes")
