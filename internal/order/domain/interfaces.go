@@ -7,7 +7,7 @@ import (
 
 type (
 	//获取删除订单的信息
-	OrderRepo interface {
+	DomainOrderRepo interface {
 		GetListDeleteOrders(context.Context) ([]*entity.Order, error)
 	}
 )

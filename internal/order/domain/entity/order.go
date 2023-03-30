@@ -32,6 +32,5 @@ func NewOrder(e event.Ordered) *Order {
 	}
 
 	order.ApplyDomain(orderDeletedEvent)
-
 	return order
 }

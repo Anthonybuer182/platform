@@ -18,15 +18,15 @@ var OrderGRPCServerSet = wire.NewSet(NewOrderGRPCServer)
 
 type OrderGRPCServer struct {
 	gen.UnimplementedOrderServiceServer
-	orepo order.OrdersRepo
+	uc order.GrpcOrdersRepo
 }
 
 func NewOrderGRPCServer(
 	grpcServer *grpc.Server,
-	uc order.OrdersRepo,
+	uc order.GrpcOrdersRepo,
 ) gen.OrderServiceServer {
 	svc := OrderGRPCServer{
-		orepo: uc,
+		uc: uc,
 	}
 
 	gen.RegisterOrderServiceServer(grpcServer, &svc)
@@ -44,7 +44,7 @@ func (g *OrderGRPCServer) GetListDeleteOrders(
 
 	res := gen.GetListOrderDeleteResponse{}
 
-	results, err := g.orepo.GetListDeleteOrders(ctx)
+	results, err := g.uc.GetListOrdersDeleted(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "OrderGRPCServer-GetItemTypes")
 	}

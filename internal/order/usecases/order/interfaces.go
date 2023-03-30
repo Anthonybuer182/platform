@@ -6,8 +6,8 @@ import (
 )
 
 type (
-	OrdersRepo interface {
-		GetListDeleteOrders(context.Context) ([]*entity.Order, error)
+	GrpcOrdersRepo interface {
+		GetListOrdersDeleted(context.Context) ([]*entity.Order, error)
 	}
 
 	UseCase interface {
