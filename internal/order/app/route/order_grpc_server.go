@@ -40,13 +40,13 @@ func (g *OrderGRPCServer) GetListDeleteOrders(
 	ctx context.Context,
 	request *gen.GetListDeleteOrdersRequest,
 ) (*gen.GetListOrderDeleteResponse, error) {
-	slog.Info("gRPC client", "http_method", "GET", "http_name", "GetItemTypes")
+	slog.Info("gRPC client", "http_method", "GET", "http_name", "GetListDeleteOrders")
 
 	res := gen.GetListOrderDeleteResponse{}
 
 	results, err := g.uc.GetListOrdersDeleted(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "OrderGRPCServer-GetItemTypes")
+		return nil, errors.Wrap(err, "OrderGRPCServer-GetListDeleteOrders")
 	}
 
 	for _, item := range results {

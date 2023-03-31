@@ -25,7 +25,7 @@ func NewService(repo domain.DomainOrderRepo) GrpcOrdersRepo {
 func (s *service) GetListOrdersDeleted(ctx context.Context) ([]*entity.Order, error) {
 	results, err := s.repo.GetListDeleteOrders(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "service.GetItemTypes")
+		return nil, errors.Wrap(err, "service.GetListOrdersDeleted")
 	}
 
 	return results, nil
