@@ -25,6 +25,7 @@ type PlaceOrderModel struct {
 }
 
 type ItemModel struct {
-	Id       string
-	OrderNum string
+	Id          string
+	OrderNum    string
+	OrderStatus string
 }

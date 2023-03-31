@@ -15,35 +15,46 @@ import (
 	"platform/internal/user/domain/event/publish"
 	"google.golang.org/grpc"
 	"platform/pkg/rabbitmq/publisher"
+	"platform/internal/user/events/handlers"
 	"platform/pkg/rabbitmq"
+	"platform/pkg/rabbitmq/consumer"
 	grpc2 "platform/internal/user/infras/grpc"
 )
 
 // Injectors from wire.go:
 
-func InitApp(cfg *config.Config,rabbitMQConnStr rabbitmq.RabbitMQConnStr, grpcServer *grpc.Server) (*App, error) {
+func InitApp(cfg *config.Config,rabbitMQConnStr rabbitmq.RabbitMQConnStr, grpcServer *grpc.Server) (*App, func(),error) {
 	// rpc 调用注入 start
 	productDomainService, err := grpc2.NewGRPCOrderClient(cfg)
 	if err != nil {
-		return nil, err
+		return nil, nil,err
 	}
 	// mq 注入到用例中
 	connection,close, err := rabbitMQFunc(rabbitMQConnStr)
 	if err != nil {
 		close()
-		return nil, err
+		return nil, nil,err
 	}
 	eventPublisher, err := publisher.NewPublisher(connection)
 	if err != nil {
-		return nil,  err
+		return nil, nil, err
+	}
+	eventConsumer, err := consumer.NewConsumer(connection)
+	if err != nil {
+		close()
+		return nil, nil, err
 	}
 	orderEventPublisher := publish.NewOrderEventPublisher(eventPublisher)
 	productRepo := repo.NewOrderRepo()
 	// rpc 调用注入到用例中
 	useCase := users.NewUseCase(productRepo,productDomainService,orderEventPublisher)
-	productServiceServer := router.NewProductGRPCServer(grpcServer, useCase)
-	app := New(cfg, useCase, productServiceServer)
-	return app, nil
+	userServiceServer := router.NewUserGRPCServer(grpcServer, useCase)
+	// mq 将用例注入到订阅中 
+	orderDeletedEventHandler := handlers.NewOrderDeletedEventHandler(useCase)
+	app := New(cfg, useCase, userServiceServer,eventPublisher,eventConsumer,orderEventPublisher,connection,orderDeletedEventHandler)
+	return app, func ()  {
+		close()
+	},nil
 }
 func rabbitMQFunc(url rabbitmq.RabbitMQConnStr) (*amqp091.Connection,func(), error) {
 	conn, err := rabbitmq.NewRabbitMQConn(url)

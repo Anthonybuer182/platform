@@ -2,11 +2,15 @@ package users
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
+	events "platform/internal/pkg/event"
+	shared "platform/internal/pkg/shared_kernel"
 	"platform/internal/user/domain"
 
+	"github.com/google/uuid"
 	"github.com/google/wire"
 	"github.com/pkg/errors"
 )
@@ -46,14 +50,39 @@ func (s *service) GetDeletedOrder(ctx context.Context) ([]*domain.OrderDto, erro
 	orders := []*domain.OrderDto{&order1}
 	return orders, nil
 }
-func (s *service) DeleteOrder(ctx context.Context) ([]*bool, error) {
+func (s *service) DeleteOrder(ctx context.Context) (bool, error) {
 	// 基于mq 发布订阅删除订单
-	// results, err := s.repo.GetAll(ctx)
-	// if err != nil {
-	// 	return nil, errors.Wrap(err, "service.GetItemTypes")
-	// }
+	event := events.OrderDeleted{
+		OrderId:     "1",
+		OrderStatus: "1",
+	}
+	order := NewOrder()
+	order.ApplyDomain(event)
+	orderEvent := order.DomainEvents()[0]
+	eventBytes, err := json.Marshal(orderEvent)
+	if err != nil {
+		return false, errors.Wrap(err, "json.Marshal[event]")
+	}
+	if err := s.orderEventPub.Publish(ctx, eventBytes, "text/plain"); err != nil {
+		return false, nil
+	}
+	return true, nil
+}
 
-	return nil, nil
+type Order struct {
+	shared.AggregateRoot
+	ID              uuid.UUID
+	OrderSource     shared.OrderSource
+	LoyaltyMemberID uuid.UUID
+	OrderStatus     shared.Status
+	Location        shared.Location
+	// LineItems       []*LineItem
+}
+
+func NewOrder() *Order {
+	return &Order{
+		ID: uuid.New(),
+	}
 }
 
 func (s *service) GetItemTypes(ctx context.Context) ([]*domain.ItemTypeDto, error) {

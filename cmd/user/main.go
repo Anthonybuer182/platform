@@ -13,6 +13,10 @@ import (
 	"platform/pkg/logger"
 	"platform/pkg/rabbitmq"
 
+	pkgConsumer "platform/pkg/rabbitmq/consumer"
+
+	pkgPublisher "platform/pkg/rabbitmq/publisher"
+
 	"github.com/sirupsen/logrus"
 	"go.uber.org/automaxprocs/maxprocs"
 	"golang.org/x/exp/slog"
@@ -50,11 +54,7 @@ func main() {
 		<-ctx.Done()
 	}()
 
-	_, err = app.InitApp(cfg, rabbitmq.RabbitMQConnStr(cfg.RabbitMQ.URL), server)
-	if err != nil {
-		slog.Error("failed init app", err)
-		cancel()
-	}
+	cleanup := prepareApp(ctx, cancel, cfg, server)
 
 	// gRPC Server.
 	address := fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port)
@@ -85,8 +85,42 @@ func main() {
 
 	select {
 	case v := <-quit:
+		cleanup()
 		slog.Info("signal.Notify", v)
 	case done := <-ctx.Done():
+		cleanup()
 		slog.Info("ctx.Done", done)
 	}
+}
+func prepareApp(ctx context.Context, cancel context.CancelFunc, cfg *config.Config, server *grpc.Server) func() {
+	a, close, err := app.InitApp(cfg, rabbitmq.RabbitMQConnStr(cfg.RabbitMQ.URL), server)
+	if err != nil {
+		slog.Error("failed init app", err)
+		cancel()
+		<-ctx.Done()
+	}
+
+	a.OrderPub.Configure(
+		pkgPublisher.ExchangeName("order-exchange"),
+		pkgPublisher.BindingKey("order-routing-key"),
+		pkgPublisher.MessageTypeName("order-deleted"),
+	)
+
+	a.Consumer.Configure(
+		pkgConsumer.ExchangeName("user-order-exchange"),
+		pkgConsumer.QueueName("user-order-queue"),
+		pkgConsumer.BindingKey("user-order-routing-key"),
+		pkgConsumer.ConsumerTag("user-order-consumer"),
+	)
+
+	go func() {
+		err1 := a.Consumer.StartConsumer(a.Worker)
+		if err1 != nil {
+			slog.Error("failed to start Consumer", err1)
+			cancel()
+			<-ctx.Done()
+		}
+	}()
+
+	return close
 }

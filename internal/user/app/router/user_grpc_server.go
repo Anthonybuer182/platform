@@ -13,20 +13,20 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var _ gen.UserServiceServer = (*productGRPCServer)(nil)
+var _ gen.UserServiceServer = (*userGRPCServer)(nil)
 
-var ProductGRPCServerSet = wire.NewSet(NewProductGRPCServer)
+var UserGRPCServerSet = wire.NewSet(NewUserGRPCServer)
 
-type productGRPCServer struct {
+type userGRPCServer struct {
 	gen.UnimplementedUserServiceServer
 	uc users.UseCase
 }
 
-func NewProductGRPCServer(
+func NewUserGRPCServer(
 	grpcServer *grpc.Server,
 	uc users.UseCase,
 ) gen.UserServiceServer {
-	svc := productGRPCServer{
+	svc := userGRPCServer{
 		uc: uc,
 	}
 
@@ -37,27 +37,27 @@ func NewProductGRPCServer(
 	return &svc
 }
 
-func (g *productGRPCServer) DeleteOrders(
+func (g *userGRPCServer) DeleteOrders(
 	ctx context.Context,
 	request *gen.DeleteOrdersRequest,
 ) (*gen.DeleteOrdersResponse, error) {
-	slog.Info("gRPC client", "http_method", "GET", "http_name", "GetItemTypes")
+	slog.Info("gRPC client", "http_method", "POST", "http_name", "DeleteOrders")
 	res := gen.DeleteOrdersResponse{}
 	// 基于mq的发布订阅删除订单
-
-	res.Sunccess = true
+	result, _ := g.uc.DeleteOrder(ctx)
+	res.Sunccess = result
 	return &res, nil
 }
-func (g *productGRPCServer) GetDeletedOrders(
+func (g *userGRPCServer) GetDeletedOrders(
 	ctx context.Context,
 	request *gen.GetDeletedOrdersRequest,
 ) (*gen.GetDeletedOrdersResponse, error) {
-	slog.Info("gRPC client", "http_method", "GET", "http_name", "GetItemTypes")
+	slog.Info("gRPC client", "http_method", "GET", "http_name", "GetDeletedOrders")
 	res := gen.GetDeletedOrdersResponse{}
 
 	results, err := g.uc.GetDeletedOrder(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "productGRPCServer-GetItemTypes")
+		return nil, errors.Wrap(err, "userGRPCServer-GetDeletedOrder")
 	}
 
 	for _, item := range results {
@@ -73,7 +73,7 @@ func (g *productGRPCServer) GetDeletedOrders(
 	return &res, nil
 }
 
-func (g *productGRPCServer) GetItemTypes(
+func (g *userGRPCServer) GetItemTypes(
 	ctx context.Context,
 	request *gen.GetItemTypesRequest,
 ) (*gen.GetItemTypesResponse, error) {
@@ -83,7 +83,7 @@ func (g *productGRPCServer) GetItemTypes(
 
 	results, err := g.uc.GetItemTypes(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "productGRPCServer-GetItemTypes")
+		return nil, errors.Wrap(err, "userGRPCServer-GetItemTypes")
 	}
 
 	for _, item := range results {
@@ -98,7 +98,7 @@ func (g *productGRPCServer) GetItemTypes(
 	return &res, nil
 }
 
-func (g *productGRPCServer) GetItemsByType(
+func (g *userGRPCServer) GetItemsByType(
 	ctx context.Context,
 	request *gen.GetItemsByTypeRequest,
 ) (*gen.GetItemsByTypeResponse, error) {
@@ -108,7 +108,7 @@ func (g *productGRPCServer) GetItemsByType(
 
 	results, err := g.uc.GetItemsByType(ctx, request.ItemTypes)
 	if err != nil {
-		return nil, errors.Wrap(err, "productGRPCServer-GetItemsByType")
+		return nil, errors.Wrap(err, "userGRPCServer-GetItemsByType")
 	}
 
 	for _, item := range results {

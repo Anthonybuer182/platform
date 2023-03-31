@@ -39,18 +39,6 @@ func (p *orderGRPCClient) GetDeletedOreders(
 	isBarista bool,
 ) ([]*domain.ItemModel, error) {
 	c := gen.NewOrderServiceClient(p.conn)
-
-	// itemTypes := ""
-	// if isBarista {
-	// 	itemTypes = lo.Reduce(model.BaristaItems, func(agg string, item *domain.OrderItemModel, _ int) string {
-	// 		return fmt.Sprintf("%s,%s", agg, item.ItemType.String())
-	// 	}, "")
-	// } else {
-	// 	itemTypes = lo.Reduce(model.KitchenItems, func(agg string, item *domain.OrderItemModel, _ int) string {
-	// 		return fmt.Sprintf("%s,%s", agg, item.ItemType.String())
-	// 	}, "")
-	// }
-
 	// res, err := c.GetListDeleteOrders(ctx, &gen.GetListDeleteOrdersRequest{ItemTypes: strings.TrimLeft(itemTypes, ",")})
 	res, err := c.GetListDeleteOrders(ctx, &gen.GetListDeleteOrdersRequest{})
 	if err != nil {
@@ -60,8 +48,9 @@ func (p *orderGRPCClient) GetDeletedOreders(
 	results := make([]*domain.ItemModel, 0)
 	for _, item := range res.Orders {
 		results = append(results, &domain.ItemModel{
-			Id:       item.Id,
-			OrderNum: item.OrderNum,
+			Id:          item.Id,
+			OrderNum:    item.OrderNum,
+			OrderStatus: item.OrderStatus,
 		})
 	}
 
