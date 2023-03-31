@@ -18,12 +18,12 @@ var OrderGRPCServerSet = wire.NewSet(NewOrderGRPCServer)
 
 type OrderGRPCServer struct {
 	gen.UnimplementedOrderServiceServer
-	uc order.GrpcOrdersRepo
+	uc order.UseCase
 }
 
 func NewOrderGRPCServer(
 	grpcServer *grpc.Server,
-	uc order.GrpcOrdersRepo,
+	uc order.UseCase,
 ) gen.OrderServiceServer {
 	svc := OrderGRPCServer{
 		uc: uc,

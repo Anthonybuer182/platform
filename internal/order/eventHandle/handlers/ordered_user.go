@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"platform/internal/order/domain/entity"
 	event2 "platform/internal/order/eventHandle"
+	"platform/internal/order/usecases/order"
 	"strconv"
 
 	"github.com/google/wire"
@@ -13,22 +14,21 @@ import (
 	"platform/internal/order/infras/postgresql"
 	"platform/internal/pkg/event"
 	"platform/pkg/postgres"
-	pkgPublisher "platform/pkg/rabbitmq/publisher"
 )
 
 type OrderedEventHandlerImpl struct {
 	pg      postgres.DBEngine
-	userPub pkgPublisher.EventPublisher
+	userPub order.UserEventPublisher
 }
 
-var _ event2.OrderedEventHandler = (*OrderedEventHandlerImpl)(nil)
+var _ event2.OrderedDeletedEventHandler = (*OrderedEventHandlerImpl)(nil)
 
 var OrderedEventHandlerSet = wire.NewSet(NewOrderedEventHandlerImpl)
 
 func NewOrderedEventHandlerImpl(
 	pg postgres.DBEngine,
-	userPub pkgPublisher.EventPublisher,
-) event2.OrderedEventHandler {
+	userPub order.UserEventPublisher,
+) event2.OrderedDeletedEventHandler {
 	return &OrderedEventHandlerImpl{
 		pg:      pg,
 		userPub: userPub,

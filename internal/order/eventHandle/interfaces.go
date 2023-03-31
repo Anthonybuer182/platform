@@ -6,6 +6,6 @@ import (
 	"platform/internal/pkg/event"
 )
 
-type OrderedEventHandler interface {
+type OrderedDeletedEventHandler interface {
 	Handle(context.Context, event.Ordered) error
 }

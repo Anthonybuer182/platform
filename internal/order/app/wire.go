@@ -6,8 +6,13 @@ package app
 import (
 	"github.com/google/wire"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"google.golang.org/grpc"
 	"platform/cmd/order/config"
-	"platform/internal/order/eventHandle"
+	router "platform/internal/order/app/route"
+	"platform/internal/order/eventHandle/handlers"
+	"platform/internal/order/infras"
+	"platform/internal/order/infras/repo"
+	"platform/internal/order/usecases/order"
 	"platform/pkg/postgres"
 	"platform/pkg/rabbitmq"
 	pkgConsumer "platform/pkg/rabbitmq/consumer"
@@ -18,14 +23,19 @@ func InitApp(
 	cfg *config.Config,
 	dbConnStr postgres.DBConnString,
 	rabbitMQConnStr rabbitmq.RabbitMQConnStr,
+	grpcServer *grpc.Server,
 ) (*App, func(), error) {
 	panic(wire.Build(
 		New,
 		dbEngineFunc,
 		rabbitMQFunc,
-		pkgPublisher.EventPublisherSet,
 		pkgConsumer.EventConsumerSet,
-		eventHandle.KitchenOrderedEventHandlerSet,
+		pkgPublisher.EventPublisherSet,
+		infras.UserEventPublisherSet,
+		repo.RepositorySet,
+		order.UseCaseSet,
+		router.OrderGRPCServerSet,
+		handlers.OrderedEventHandlerSet,
 	))
 }
 

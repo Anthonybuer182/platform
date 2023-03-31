@@ -10,8 +10,9 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 	"google.golang.org/grpc"
 	"platform/cmd/order/config"
-	router "platform/internal/order/app/route"
+	"platform/internal/order/app/route"
 	"platform/internal/order/eventHandle/handlers"
+	"platform/internal/order/infras"
 	"platform/internal/order/infras/repo"
 	"platform/internal/order/usecases/order"
 	"platform/pkg/postgres"
@@ -32,25 +33,24 @@ func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnSt
 		cleanup()
 		return nil, nil, err
 	}
-	eventPublisher, err := publisher.NewPublisher(connection)
-	if err != nil {
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
 	eventConsumer, err := consumer.NewConsumer(connection)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-
-	orderReq := repo.NewOrderRepo(dbEngine)
-	userCase := order.NewService(orderReq)
-	orderServiceServer := router.NewOrderGRPCServer(grpcServer, userCase)
-
-	OrderedEventHandler := handlers.NewOrderedEventHandlerImpl(dbEngine, eventPublisher)
-	app := New(cfg, dbEngine, connection, eventPublisher, eventConsumer, orderServiceServer, OrderedEventHandler)
+	eventPublisher, err := publisher.NewPublisher(connection)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	userEventPublisher := infras.NewUserEventPublisher(eventPublisher)
+	ordersRepo := repo.NewOrderRepo(dbEngine)
+	useCase := order.NewService(ordersRepo, userEventPublisher)
+	orderServiceServer := router.NewOrderGRPCServer(grpcServer, useCase)
+	orderedDeletedEventHandler := handlers.NewOrderedEventHandlerImpl(dbEngine, userEventPublisher)
+	app := New(cfg, dbEngine, connection, eventConsumer, userEventPublisher, ordersRepo, useCase, orderServiceServer, orderedDeletedEventHandler)
 	return app, func() {
 		cleanup2()
 		cleanup()

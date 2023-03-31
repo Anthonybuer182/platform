@@ -3,14 +3,22 @@ package order
 import (
 	"context"
 	"platform/internal/order/domain/entity"
+	"platform/pkg/rabbitmq/publisher"
 )
 
 type (
-	GrpcOrdersRepo interface {
-		GetListOrdersDeleted(context.Context) ([]*entity.Order, error)
+	OrdersRepo interface {
+		FindListDeleteOrder(context.Context) ([]*entity.Order, error)
+		DeleteOrder(context.Context, entity.Order) error
 	}
 
 	UseCase interface {
-		DeleteOrder(context.Context, string) error
+		GetListOrdersDeleted(ctx context.Context) ([]*entity.Order, error)
+		DeleteOrder(context.Context, entity.Order) error
+	}
+
+	UserEventPublisher interface {
+		Configure(...publisher.Option)
+		Publish(context.Context, []byte, string) error
 	}
 )

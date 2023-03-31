@@ -4,47 +4,51 @@ import (
 	"context"
 	"encoding/json"
 	"platform/internal/order/eventHandle"
+	"platform/internal/order/usecases/order"
 	"platform/proto/gen"
 
+	amqp "github.com/rabbitmq/amqp091-go"
+	"golang.org/x/exp/slog"
 	"platform/cmd/order/config"
 	"platform/internal/pkg/event"
 	"platform/pkg/postgres"
 	pkgConsumer "platform/pkg/rabbitmq/consumer"
-	pkgPublisher "platform/pkg/rabbitmq/publisher"
-
-	amqp "github.com/rabbitmq/amqp091-go"
-	"golang.org/x/exp/slog"
 )
 
 type App struct {
-	Cfg *config.Config
-
-	PG       postgres.DBEngine
-	AMQPConn *amqp.Connection
-
-	OrderPub        pkgPublisher.EventPublisher
+	Cfg             *config.Config
+	PG              postgres.DBEngine
+	AMQPConn        *amqp.Connection
 	Consumer        pkgConsumer.EventConsumer
+	OrderPub        order.UserEventPublisher
+	Repo            order.OrdersRepo
+	UC              order.UseCase
 	OrderGRPCServer gen.OrderServiceServer
-	handler         eventHandle.OrderedEventHandler
+	Handler         eventHandle.OrderedDeletedEventHandler
 }
 
 func New(
 	cfg *config.Config,
 	pg postgres.DBEngine,
 	amqpConn *amqp.Connection,
-	counterOrderPub pkgPublisher.EventPublisher,
 	consumer pkgConsumer.EventConsumer,
+	orderPub order.UserEventPublisher,
+	repo order.OrdersRepo,
+	uc order.UseCase,
 	orderGRPCServer gen.OrderServiceServer,
-	handler eventHandle.OrderedEventHandler,
+	handler eventHandle.OrderedDeletedEventHandler,
+
 ) *App {
 	return &App{
 		Cfg:             cfg,
 		PG:              pg,
 		AMQPConn:        amqpConn,
-		OrderPub:        counterOrderPub,
 		Consumer:        consumer,
+		OrderPub:        orderPub,
+		Repo:            repo,
+		UC:              uc,
 		OrderGRPCServer: orderGRPCServer,
-		handler:         handler,
+		Handler:         handler,
 	}
 }
 
@@ -62,7 +66,7 @@ func (c *App) Worker(ctx context.Context, messages <-chan amqp.Delivery) {
 				slog.Error("failed to Unmarshal message", err)
 			}
 
-			err = c.handler.Handle(ctx, payload)
+			err = c.Handler.Handle(ctx, payload)
 
 			if err != nil {
 				if err = delivery.Reject(false); err != nil {
