@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/wire"
 	"github.com/pkg/errors"
+	"golang.org/x/exp/slog"
 	"platform/internal/order/domain"
 )
 
@@ -43,6 +44,7 @@ func (s *service) GetListOrdersDeleted(ctx context.Context) ([]*domain.Order, er
 		}
 		domain.OrderAggregate(ctx, order, s.userDomainSvc, orderDetails)
 	}
+	slog.Info("GetListOrdersDeleted=======", results)
 	return results, nil
 }
 

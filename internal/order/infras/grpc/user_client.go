@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/wire"
 	"github.com/pkg/errors"
+	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"platform/cmd/order/config"
@@ -35,9 +36,11 @@ func (p *usersGRPCClient) GetUserById(
 	model *domain.OrderModel,
 ) ([]*domain.Users, error) {
 	c := gen.NewUserServiceClient(p.conn)
-	ids := make([]string, 1)
+	ids := make([]string, 0)
 	ids = append(ids, model.UserId)
+	slog.Info("usergrpc-getuser:", ids, ctx)
 	res, err := c.GetUsers(ctx, &gen.GetUsersRequest{Id: ids})
+	slog.Info("usergrpc-getuser:", res, err)
 	if err != nil {
 		return nil, errors.Wrap(err, "usersGRPCClient-c.GetItemsByType")
 	}

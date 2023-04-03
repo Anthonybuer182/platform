@@ -44,16 +44,20 @@ func (g *OrderGRPCServer) GetListDeleteOrders(
 	slog.Info("gRPC client", "http_method", "GET", "http_name", "GetListDeleteOrders")
 
 	res := gen.GetListOrderDeleteResponse{}
-
+	slog.Info("grpc", res)
 	results, err := g.uc.GetListOrdersDeleted(ctx)
+	slog.Info("uc=======", results, err)
 	if err != nil {
 		return nil, errors.Wrap(err, "OrderGRPCServer-GetListDeleteOrders")
 	}
 
 	for _, item := range results {
+		itemUser := item.Users
+		username := itemUser.UserName
+		slog.Info("item===========,", username)
 		users := make([]*gen.UserDto, 1)
 		user := &gen.UserDto{
-			Name:      item.Users.UserName,
+			Name:      username,
 			Telephone: "xxxx",
 		}
 		users = append(users, user)

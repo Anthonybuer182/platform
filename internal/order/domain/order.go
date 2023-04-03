@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"golang.org/x/exp/slog"
 	shared "platform/internal/pkg/shared_kernel"
 	"strconv"
 	"time"
@@ -30,5 +31,7 @@ func OrderAggregate(ctx context.Context, order *Order, userDomainService UserDom
 	}
 	order.OrderDetail = details
 	order.Users = orderUser
+	slog.Info("OrderAggregate===========", user, order)
+
 	return order
 }
