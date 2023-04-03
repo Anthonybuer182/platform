@@ -24,7 +24,7 @@ func NewOrderDeletedEventHandler(uc users.UseCase) events.OrderDeletedEventHandl
 	}
 }
 
-func (h *orderDeletedEventHandler) Handle(ctx context.Context, e *event.OrderDeleted) error {
+func (h *orderDeletedEventHandler) Handle(ctx context.Context, e *event.UserOrderDeleted) error {
 	// 收到order服务删除订单的消息
 
 	// order, err := h.orderRepo.GetByID(ctx, e.OrderID)

@@ -11,6 +11,7 @@ import (
 	router "platform/internal/order/app/route"
 	"platform/internal/order/eventHandle/handlers"
 	"platform/internal/order/infras"
+	infrasgrpc "platform/internal/order/infras/grpc"
 	"platform/internal/order/infras/repo"
 	"platform/internal/order/usecases/order"
 	"platform/pkg/postgres"
@@ -33,6 +34,7 @@ func InitApp(
 		pkgPublisher.EventPublisherSet,
 		infras.UserEventPublisherSet,
 		repo.RepositorySet,
+		infrasgrpc.UsersGRPCClientSet,
 		order.UseCaseSet,
 		router.OrderGRPCServerSet,
 		handlers.OrderedEventHandlerSet,

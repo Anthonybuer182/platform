@@ -14,6 +14,7 @@ type (
 		configs.App  `yaml:"app"`
 		configs.HTTP `yaml:"http"`
 		configs.Log  `yaml:"logger"`
+		UsersClient  `yaml:"users_client"`
 		PG           `yaml:"postgres"`
 		RabbitMQ     `yaml:"rabbitmq"`
 	}
@@ -25,6 +26,10 @@ type (
 
 	RabbitMQ struct {
 		URL string `env-required:"true" yaml:"url" env:"RABBITMQ_URL"`
+	}
+
+	UsersClient struct {
+		URL string `env-required:"true" yaml:"url" env:"USER_CLIENT_URL"`
 	}
 )
 

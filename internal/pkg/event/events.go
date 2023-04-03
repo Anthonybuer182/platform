@@ -6,20 +6,23 @@ import (
 	shared "platform/internal/pkg/shared_kernel"
 )
 
-type Ordered struct {
+type UserOrderDelete struct {
 	shared.DomainEvent
 	OrderID     string    `json:"orderId"`
 	ItemLineID  uuid.UUID `json:"itemLineId"`
 	OrderStatus string    `json:"orderStatus"`
-	Amount      float32   `json:"amount"`
 }
 
-func (e Ordered) Identity() string {
-	return "Ordered"
+func (e UserOrderDelete) Identity() string {
+	return "UserOrderDelete"
 }
 
-type OrderDeleted struct {
+type UserOrderDeleted struct {
 	shared.DomainEvent
 	OrderId     string `json:"orderId"`
 	OrderStatus string `json:"orderStatus"`
+}
+
+func (e UserOrderDeleted) Identity() string {
+	return "UserOrderDeleted"
 }

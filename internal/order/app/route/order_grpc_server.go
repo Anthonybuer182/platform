@@ -4,6 +4,7 @@ import (
 	"context"
 	"platform/internal/order/usecases/order"
 	"platform/proto/gen"
+	"strconv"
 
 	"github.com/google/wire"
 	"github.com/pkg/errors"
@@ -50,11 +51,16 @@ func (g *OrderGRPCServer) GetListDeleteOrders(
 	}
 
 	for _, item := range results {
+		users := make([]*gen.UserDto, 1)
+		user := &gen.UserDto{
+			Name:      item.Users.UserName,
+			Telephone: "xxxx",
+		}
+		users = append(users, user)
 		res.Orders = append(res.Orders, &gen.OrderDto{
-			OrderNum:    item.OrderId,
+			OrderNum:    strconv.Itoa(item.OrderId),
 			OrderStatus: item.OrderStatus,
-			Products:    nil,
-			Users:       nil,
+			Users:       users,
 		})
 	}
 

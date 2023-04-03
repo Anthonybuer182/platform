@@ -10,13 +10,7 @@ import (
 )
 
 const getDeleteOrderList = `-- name: GetDeleteOrderList :many
-select
-       o.order_id,
-       o.user_id,
-       o.order_date,
-       o.amount,
-       o.order_state
-from "orders".orders o
+select o.order_id,o.user_id,o.order_date,o.amount,o.order_state from "orders".orders o
 `
 
 func (q *Queries) GetDeleteOrderList(ctx context.Context) ([]OrdersOrder, error) {
@@ -34,6 +28,51 @@ func (q *Queries) GetDeleteOrderList(ctx context.Context) ([]OrdersOrder, error)
 			&i.OrderDate,
 			&i.Amount,
 			&i.OrderState,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getOrderDetails = `-- name: GetOrderDetails :many
+select
+    o.order_id,
+    o.product_id,
+    o.quantity,
+    o.price
+from "orders".line_items o
+where order_id = $1
+`
+
+type GetOrderDetailsRow struct {
+	OrderID   int32  `json:"order_id"`
+	ProductID int32  `json:"product_id"`
+	Quantity  int32  `json:"quantity"`
+	Price     string `json:"price"`
+}
+
+func (q *Queries) GetOrderDetails(ctx context.Context, orderID int32) ([]GetOrderDetailsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getOrderDetails, orderID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetOrderDetailsRow
+	for rows.Next() {
+		var i GetOrderDetailsRow
+		if err := rows.Scan(
+			&i.OrderID,
+			&i.ProductID,
+			&i.Quantity,
+			&i.Price,
 		); err != nil {
 			return nil, err
 		}

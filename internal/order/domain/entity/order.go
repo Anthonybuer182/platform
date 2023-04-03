@@ -1,36 +1,35 @@
 package entity
 
 import (
-	"platform/internal/pkg/event"
-	"time"
-
+	"context"
+	"platform/internal/order/domain"
 	shared "platform/internal/pkg/shared_kernel"
-
-	"github.com/google/uuid"
+	"strconv"
+	"time"
 )
 
 type Order struct {
 	shared.AggregateRoot
-	ID          uuid.UUID
-	OrderId     string
-	OrderStatus string
+	OrderId     int
+	Users       *Users
+	OrderDate   time.Time
 	Amount      float32
-	Orderdate   time.Time
+	OrderStatus string
+	OrderDetail []*OrderDetail
 }
 
-func NewOrder(e event.Ordered) *Order {
-	order := &Order{
-		ID:          uuid.New(),
-		OrderStatus: e.OrderStatus,
-		Amount:      e.Amount,
-		Orderdate:   time.Now(),
-	}
+func OrderAggregate(ctx context.Context, order *Order, userDomainService domain.UserDomainService, details []*OrderDetail) *Order {
 
-	orderDeletedEvent := event.OrderDeleted{
-		OrderId:     e.OrderID,
-		OrderStatus: e.OrderStatus,
+	//通过grpc查询用户服务
+	user, err := userDomainService.GetUserById(ctx, &domain.OrderModel{
+		UserId: strconv.Itoa(int(order.Users.UserId)),
+	})
+	var orderUser *Users
+	if err != nil && len(user) > 0 {
+		userModel := user[0]
+		orderUser = &Users{UserId: userModel.UserId, UserName: userModel.UserName, CreateOn: userModel.CreateOn}
 	}
-
-	order.ApplyDomain(orderDeletedEvent)
+	order.OrderDetail = details
+	order.Users = orderUser
 	return order
 }

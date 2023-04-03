@@ -8,6 +8,6 @@ import (
 
 type (
 	OrderDeletedEventHandler interface {
-		Handle(context.Context, *event.OrderDeleted) error
+		Handle(context.Context, *event.UserOrderDeleted) error
 	}
 )

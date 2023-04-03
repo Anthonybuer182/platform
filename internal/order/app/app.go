@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"platform/internal/order/domain"
 	"platform/internal/order/eventHandle"
 	"platform/internal/order/usecases/order"
 	"platform/proto/gen"
@@ -16,15 +17,16 @@ import (
 )
 
 type App struct {
-	Cfg             *config.Config
-	PG              postgres.DBEngine
-	AMQPConn        *amqp.Connection
-	Consumer        pkgConsumer.EventConsumer
-	OrderPub        order.UserEventPublisher
-	Repo            order.OrdersRepo
-	UC              order.UseCase
-	OrderGRPCServer gen.OrderServiceServer
-	Handler         eventHandle.OrderedDeletedEventHandler
+	Cfg              *config.Config
+	PG               postgres.DBEngine
+	AMQPConn         *amqp.Connection
+	Consumer         pkgConsumer.EventConsumer
+	OrderPub         order.UserEventPublisher
+	Repo             order.OrdersRepo
+	UserDomainServer domain.UserDomainService
+	UC               order.UseCase
+	OrderGRPCServer  gen.OrderServiceServer
+	Handler          eventHandle.OrderedDeletedEventHandler
 }
 
 func New(
@@ -34,21 +36,23 @@ func New(
 	consumer pkgConsumer.EventConsumer,
 	orderPub order.UserEventPublisher,
 	repo order.OrdersRepo,
+	userDomainSVC domain.UserDomainService,
 	uc order.UseCase,
 	orderGRPCServer gen.OrderServiceServer,
 	handler eventHandle.OrderedDeletedEventHandler,
 
 ) *App {
 	return &App{
-		Cfg:             cfg,
-		PG:              pg,
-		AMQPConn:        amqpConn,
-		Consumer:        consumer,
-		OrderPub:        orderPub,
-		Repo:            repo,
-		UC:              uc,
-		OrderGRPCServer: orderGRPCServer,
-		Handler:         handler,
+		Cfg:              cfg,
+		PG:               pg,
+		AMQPConn:         amqpConn,
+		Consumer:         consumer,
+		OrderPub:         orderPub,
+		Repo:             repo,
+		UserDomainServer: userDomainSVC,
+		UC:               uc,
+		OrderGRPCServer:  orderGRPCServer,
+		Handler:          handler,
 	}
 }
 
@@ -59,7 +63,7 @@ func (c *App) Worker(ctx context.Context, messages <-chan amqp.Delivery) {
 
 		switch delivery.Type {
 		case "kitchen-order-created":
-			var payload event.Ordered
+			var payload event.UserOrderDelete
 			err := json.Unmarshal(delivery.Body, &payload)
 
 			if err != nil {

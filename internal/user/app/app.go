@@ -56,7 +56,7 @@ func (a *App) Worker(ctx context.Context, messages <-chan amqp.Delivery) {
 
 		switch delivery.Type {
 		case "order-deleted":
-			var payload shared.OrderDeleted
+			var payload shared.UserOrderDeleted
 
 			err := json.Unmarshal(delivery.Body, &payload)
 			if err != nil {

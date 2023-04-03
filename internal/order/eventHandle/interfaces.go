@@ -7,5 +7,5 @@ import (
 )
 
 type OrderedDeletedEventHandler interface {
-	Handle(context.Context, event.Ordered) error
+	Handle(context.Context, event.UserOrderDelete) error
 }
