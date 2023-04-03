@@ -31,7 +31,7 @@ service UserService {
     };
   }
 
-  rpc GetUsers(GetUsersRequest) returns (GetDeletedOrdersResponse) {
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {
     option (google.api.http) = {
       get: "/v1/api/get-users"
     };
@@ -63,7 +63,7 @@ service UserService {
   }
 }
 message GetUsersRequest{
-  repeated string id =1；
+  repeated string id =1;
 }
 message GetUsersResponse {
   repeated UsersDto users = 1;
