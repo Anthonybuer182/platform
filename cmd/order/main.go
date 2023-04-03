@@ -3,20 +3,22 @@ package main
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/sirupsen/logrus"
-	"go.uber.org/automaxprocs/maxprocs"
-	"golang.org/x/exp/slog"
+	"google.golang.org/grpc"
+
 	"platform/cmd/order/config"
 	"platform/internal/order/app"
 	"platform/pkg/logger"
 	"platform/pkg/postgres"
 	"platform/pkg/rabbitmq"
+
+	"github.com/sirupsen/logrus"
+	"go.uber.org/automaxprocs/maxprocs"
+	"golang.org/x/exp/slog"
 
 	pkgConsumer "platform/pkg/rabbitmq/consumer"
 	pkgPublisher "platform/pkg/rabbitmq/publisher"
@@ -62,16 +64,16 @@ func main() {
 	}
 
 	a.OrderPub.Configure(
-		pkgPublisher.ExchangeName("counter-order-exchange"),
-		pkgPublisher.BindingKey("counter-order-routing-key"),
-		pkgPublisher.MessageTypeName("kitchen-order-updated"),
+		pkgPublisher.ExchangeName("user-order-exchange"),
+		pkgPublisher.BindingKey("user-order-routing-key"),
+		pkgPublisher.MessageTypeName("user-order-deleted"),
 	)
 
 	a.Consumer.Configure(
-		pkgConsumer.ExchangeName("kitchen-order-exchange"),
-		pkgConsumer.QueueName("kitchen-order-queue"),
-		pkgConsumer.BindingKey("kitchen-order-routing-key"),
-		pkgConsumer.ConsumerTag("kitchen-order-consumer"),
+		pkgConsumer.ExchangeName("order-exchange"),
+		pkgConsumer.QueueName("order-queue"),
+		pkgConsumer.BindingKey("order-routing-key"),
+		pkgConsumer.ConsumerTag("order-consumer"),
 	)
 
 	slog.Info("🌏 start server...", "address", fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port))
