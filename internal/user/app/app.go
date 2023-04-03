@@ -6,12 +6,11 @@ import (
 	"platform/cmd/user/config"
 	shared "platform/internal/pkg/event"
 	ordersUC "platform/internal/user/usecases/users"
-	productUC "platform/internal/user/usecases/users"
 	pkgConsumer "platform/pkg/rabbitmq/consumer"
 	pkgPublisher "platform/pkg/rabbitmq/publisher"
 	"platform/proto/gen"
 
-	"platform/internal/user/events"
+	"platform/internal/user/domain/events/subscribe"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 	"golang.org/x/exp/slog"
@@ -19,24 +18,24 @@ import (
 
 type App struct {
 	Cfg            *config.Config
-	UC             productUC.UseCase
+	UC             ordersUC.UseCase
 	UserGRPCServer gen.UserServiceServer
 	AMQPConn       *amqp.Connection
 	Publisher      pkgPublisher.EventPublisher
 	Consumer       pkgConsumer.EventConsumer
 	OrderPub       ordersUC.OrderEventPublisher
-	orderHandler   events.OrderDeletedEventHandler
+	orderHandler   subscribe.OrderDeletedEventHandler
 }
 
 func New(
 	cfg *config.Config,
-	uc productUC.UseCase,
+	uc ordersUC.UseCase,
 	userGRPCServer gen.UserServiceServer,
 	publisher pkgPublisher.EventPublisher,
 	consumer pkgConsumer.EventConsumer,
 	orderPub ordersUC.OrderEventPublisher,
 	amqpConn *amqp.Connection,
-	orderHandler events.OrderDeletedEventHandler,
+	orderHandler subscribe.OrderDeletedEventHandler,
 ) *App {
 	return &App{
 		Cfg:            cfg,

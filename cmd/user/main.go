@@ -103,7 +103,7 @@ func prepareApp(ctx context.Context, cancel context.CancelFunc, cfg *config.Conf
 	a.OrderPub.Configure(
 		pkgPublisher.ExchangeName("order-exchange"),
 		pkgPublisher.BindingKey("order-routing-key"),
-		pkgPublisher.MessageTypeName("order-deleted"),
+		pkgPublisher.MessageTypeName("order-delete"),
 	)
 
 	a.Consumer.Configure(

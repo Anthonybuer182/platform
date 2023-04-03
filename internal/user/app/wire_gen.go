@@ -12,10 +12,10 @@ import (
 	"platform/internal/user/app/router"
 	"platform/internal/user/infras/repo"
 	"platform/internal/user/usecases/users"
-	"platform/internal/user/domain/event/publish"
+	"platform/internal/user/domain/events/publish"
 	"google.golang.org/grpc"
 	"platform/pkg/rabbitmq/publisher"
-	"platform/internal/user/events/handlers"
+	"platform/internal/user/domain/events/subscribe"
 	"platform/pkg/rabbitmq"
 	"platform/pkg/rabbitmq/consumer"
 	grpc2 "platform/internal/user/infras/grpc"
@@ -50,7 +50,7 @@ func InitApp(cfg *config.Config,rabbitMQConnStr rabbitmq.RabbitMQConnStr, grpcSe
 	useCase := users.NewUseCase(productRepo,productDomainService,orderEventPublisher)
 	userServiceServer := router.NewUserGRPCServer(grpcServer, useCase)
 	// mq 将用例注入到订阅中 
-	orderDeletedEventHandler := handlers.NewOrderDeletedEventHandler(useCase)
+	orderDeletedEventHandler := subscribe.NewOrderDeletedEventHandler(useCase)
 	app := New(cfg, useCase, userServiceServer,eventPublisher,eventConsumer,orderEventPublisher,connection,orderDeletedEventHandler)
 	return app, func ()  {
 		close()

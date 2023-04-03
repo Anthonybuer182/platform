@@ -24,6 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type UserServiceClient interface {
 	GetItemTypes(ctx context.Context, in *GetItemTypesRequest, opts ...grpc.CallOption) (*GetItemTypesResponse, error)
 	GetItemsByType(ctx context.Context, in *GetItemsByTypeRequest, opts ...grpc.CallOption) (*GetItemsByTypeResponse, error)
+	GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error)
 	GetDeletedOrders(ctx context.Context, in *GetDeletedOrdersRequest, opts ...grpc.CallOption) (*GetDeletedOrdersResponse, error)
 	DeleteOrders(ctx context.Context, in *DeleteOrdersRequest, opts ...grpc.CallOption) (*DeleteOrdersResponse, error)
 }
@@ -54,6 +55,15 @@ func (c *userServiceClient) GetItemsByType(ctx context.Context, in *GetItemsByTy
 	return out, nil
 }
 
+func (c *userServiceClient) GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error) {
+	out := new(GetUsersResponse)
+	err := c.cc.Invoke(ctx, "/platform.proto.productapi.UserService/GetUsers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) GetDeletedOrders(ctx context.Context, in *GetDeletedOrdersRequest, opts ...grpc.CallOption) (*GetDeletedOrdersResponse, error) {
 	out := new(GetDeletedOrdersResponse)
 	err := c.cc.Invoke(ctx, "/platform.proto.productapi.UserService/GetDeletedOrders", in, out, opts...)
@@ -78,6 +88,7 @@ func (c *userServiceClient) DeleteOrders(ctx context.Context, in *DeleteOrdersRe
 type UserServiceServer interface {
 	GetItemTypes(context.Context, *GetItemTypesRequest) (*GetItemTypesResponse, error)
 	GetItemsByType(context.Context, *GetItemsByTypeRequest) (*GetItemsByTypeResponse, error)
+	GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error)
 	GetDeletedOrders(context.Context, *GetDeletedOrdersRequest) (*GetDeletedOrdersResponse, error)
 	DeleteOrders(context.Context, *DeleteOrdersRequest) (*DeleteOrdersResponse, error)
 }
@@ -91,6 +102,9 @@ func (UnimplementedUserServiceServer) GetItemTypes(context.Context, *GetItemType
 }
 func (UnimplementedUserServiceServer) GetItemsByType(context.Context, *GetItemsByTypeRequest) (*GetItemsByTypeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetItemsByType not implemented")
+}
+func (UnimplementedUserServiceServer) GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUsers not implemented")
 }
 func (UnimplementedUserServiceServer) GetDeletedOrders(context.Context, *GetDeletedOrdersRequest) (*GetDeletedOrdersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetDeletedOrders not implemented")
@@ -146,6 +160,24 @@ func _UserService_GetItemsByType_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/platform.proto.productapi.UserService/GetUsers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUsers(ctx, req.(*GetUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_GetDeletedOrders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetDeletedOrdersRequest)
 	if err := dec(in); err != nil {
@@ -196,6 +228,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetItemsByType",
 			Handler:    _UserService_GetItemsByType_Handler,
+		},
+		{
+			MethodName: "GetUsers",
+			Handler:    _UserService_GetUsers_Handler,
 		},
 		{
 			MethodName: "GetDeletedOrders",

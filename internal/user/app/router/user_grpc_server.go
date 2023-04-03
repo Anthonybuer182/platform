@@ -36,7 +36,18 @@ func NewUserGRPCServer(
 
 	return &svc
 }
-
+func (g *userGRPCServer) GetUsers(
+	ctx context.Context,
+	request *gen.GetUsersRequest,
+) (*gen.GetUsersResponse, error) {
+	slog.Info("gRPC client", "http_method", "POST", "http_name", "DeleteOrders")
+	mockUsers := []string{"张三", "李四", "王五", "赵六"}
+	res := gen.GetUsersResponse{}
+	for i, v := range request.Id {
+		res.Users = append(res.Users, &gen.UsersDto{UserName: mockUsers[i] + v})
+	}
+	return &res, nil
+}
 func (g *userGRPCServer) DeleteOrders(
 	ctx context.Context,
 	request *gen.DeleteOrdersRequest,
