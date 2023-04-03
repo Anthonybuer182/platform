@@ -2,10 +2,11 @@ package domain
 
 import (
 	"context"
-	"golang.org/x/exp/slog"
 	shared "platform/internal/pkg/shared_kernel"
 	"strconv"
 	"time"
+
+	"golang.org/x/exp/slog"
 )
 
 type Order struct {
@@ -25,7 +26,7 @@ func OrderAggregate(ctx context.Context, order *Order, userDomainService UserDom
 		UserId: strconv.Itoa(int(order.Users.UserId)),
 	})
 	var orderUser *Users
-	if err != nil && len(user) > 0 {
+	if err == nil && len(user) > 0 {
 		userModel := user[0]
 		orderUser = &Users{UserId: userModel.UserId, UserName: userModel.UserName, CreateOn: userModel.CreateOn}
 	}
