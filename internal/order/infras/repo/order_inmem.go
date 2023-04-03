@@ -52,8 +52,8 @@ func (o *OrderRepo) UFindListDeleteOrder(ctx context.Context) ([]*domain.Order, 
 	return entities, nil
 }
 
-func (o *OrderRepo) UFindListOrderDetails(ctx context.Context, model *domain.Order) ([]*domain.OrderDetail, error) {
-	entities := make([]*domain.OrderDetail, 0)
+func (o *OrderRepo) UFindListOrderDetails(ctx context.Context, model *domain.Order) ([]*domain.OrderDetails, error) {
+	entities := make([]*domain.OrderDetails, 0)
 	//todo
 	querier := postgresql.New(o.pg.GetDB())
 	results, err := querier.GetOrderDetails(ctx, int32(model.OrderId))
@@ -64,7 +64,8 @@ func (o *OrderRepo) UFindListOrderDetails(ctx context.Context, model *domain.Ord
 
 	for _, item := range results {
 		price, _ := strconv.ParseFloat(item.Price, 64)
-		orderDetails := &domain.OrderDetail{
+
+		orderDetails := &domain.OrderDetails{
 			OrderID:   int(item.OrderID),
 			ProductID: int(item.ProductID),
 			Quantity:  int(item.Quantity),

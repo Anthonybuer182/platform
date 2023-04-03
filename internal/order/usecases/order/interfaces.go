@@ -10,7 +10,7 @@ type (
 	//基础设施的数据库操作
 	OrdersRepo interface {
 		UFindListDeleteOrder(context.Context) ([]*domain.Order, error)
-		UFindListOrderDetails(context.Context, *domain.Order) ([]*domain.OrderDetail, error)
+		UFindListOrderDetails(context.Context, *domain.Order) ([]*domain.OrderDetails, error)
 		UDeleteOrder(context.Context, *domain.CmdOrders) error
 	}
 

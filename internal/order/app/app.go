@@ -17,16 +17,17 @@ import (
 )
 
 type App struct {
-	Cfg              *config.Config
-	PG               postgres.DBEngine
-	AMQPConn         *amqp.Connection
-	Consumer         pkgConsumer.EventConsumer
-	OrderPub         order.UserEventPublisher
-	Repo             order.OrdersRepo
-	UserDomainServer domain.UserDomainService
-	UC               order.UseCase
-	OrderGRPCServer  gen.OrderServiceServer
-	Handler          eventHandle.OrderedDeletedEventHandler
+	Cfg                 *config.Config
+	PG                  postgres.DBEngine
+	AMQPConn            *amqp.Connection
+	Consumer            pkgConsumer.EventConsumer
+	OrderPub            order.UserEventPublisher
+	Repo                order.OrdersRepo
+	UserDomainServer    domain.UserDomainService
+	ProductDomainServer domain.ProductDomainService
+	UC                  order.UseCase
+	OrderGRPCServer     gen.OrderServiceServer
+	Handler             eventHandle.OrderedDeletedEventHandler
 }
 
 func New(
@@ -37,22 +38,24 @@ func New(
 	orderPub order.UserEventPublisher,
 	repo order.OrdersRepo,
 	userDomainSVC domain.UserDomainService,
+	productDomainSvc domain.ProductDomainService,
 	uc order.UseCase,
 	orderGRPCServer gen.OrderServiceServer,
 	handler eventHandle.OrderedDeletedEventHandler,
 
 ) *App {
 	return &App{
-		Cfg:              cfg,
-		PG:               pg,
-		AMQPConn:         amqpConn,
-		Consumer:         consumer,
-		OrderPub:         orderPub,
-		Repo:             repo,
-		UserDomainServer: userDomainSVC,
-		UC:               uc,
-		OrderGRPCServer:  orderGRPCServer,
-		Handler:          handler,
+		Cfg:                 cfg,
+		PG:                  pg,
+		AMQPConn:            amqpConn,
+		Consumer:            consumer,
+		OrderPub:            orderPub,
+		Repo:                repo,
+		UserDomainServer:    userDomainSVC,
+		ProductDomainServer: productDomainSvc,
+		UC:                  uc,
+		OrderGRPCServer:     orderGRPCServer,
+		Handler:             handler,
 	}
 }
 

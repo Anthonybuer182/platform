@@ -1,4 +1,4 @@
-package infras
+package mq
 
 import (
 	"context"

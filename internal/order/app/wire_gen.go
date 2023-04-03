@@ -12,8 +12,8 @@ import (
 	"platform/cmd/order/config"
 	"platform/internal/order/app/route"
 	"platform/internal/order/eventHandle/handlers"
-	"platform/internal/order/infras"
 	"platform/internal/order/infras/grpc"
+	"platform/internal/order/infras/mq"
 	"platform/internal/order/infras/repo"
 	"platform/internal/order/usecases/order"
 	"platform/pkg/postgres"
@@ -46,7 +46,7 @@ func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnSt
 		cleanup()
 		return nil, nil, err
 	}
-	userEventPublisher := infras.NewUserEventPublisher(eventPublisher)
+	userEventPublisher := mq.NewUserEventPublisher(eventPublisher)
 	ordersRepo := repo.NewOrderRepo(dbEngine)
 	userDomainService, err := infrasgrpc.NewGRPCUserClient(cfg)
 	if err != nil {
@@ -54,10 +54,16 @@ func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnSt
 		cleanup()
 		return nil, nil, err
 	}
-	useCase := order.NewService(ordersRepo, userDomainService, userEventPublisher)
+	productDomainService, err := infrasgrpc.NewGRPCProductClient()
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	useCase := order.NewService(ordersRepo, userDomainService, productDomainService, userEventPublisher)
 	orderServiceServer := router.NewOrderGRPCServer(grpcServer, useCase)
 	orderedDeletedEventHandler := handlers.NewOrderedEventHandlerImpl(useCase, userEventPublisher)
-	app := New(cfg, dbEngine, connection, eventConsumer, userEventPublisher, ordersRepo, userDomainService, useCase, orderServiceServer, orderedDeletedEventHandler)
+	app := New(cfg, dbEngine, connection, eventConsumer, userEventPublisher, ordersRepo, userDomainService, productDomainService, useCase, orderServiceServer, orderedDeletedEventHandler)
 	return app, func() {
 		cleanup2()
 		cleanup()

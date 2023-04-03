@@ -13,18 +13,21 @@ var _ UseCase = (*service)(nil)
 var UseCaseSet = wire.NewSet(NewService)
 
 type service struct {
-	repo          OrdersRepo
-	userDomainSvc domain.UserDomainService
-	UserEventPub  UserEventPublisher
+	repo             OrdersRepo
+	userDomainSvc    domain.UserDomainService
+	productDomainSvc domain.ProductDomainService
+	UserEventPub     UserEventPublisher
 }
 
 func NewService(repo OrdersRepo,
 	userDomainSvc domain.UserDomainService,
+	productDomainSvc domain.ProductDomainService,
 	publisher UserEventPublisher) UseCase {
 	return &service{
-		repo:          repo,
-		userDomainSvc: userDomainSvc,
-		UserEventPub:  publisher,
+		repo:             repo,
+		userDomainSvc:    userDomainSvc,
+		productDomainSvc: productDomainSvc,
+		UserEventPub:     publisher,
 	}
 }
 
@@ -39,10 +42,16 @@ func (s *service) GetListOrdersDeleted(ctx context.Context) ([]*domain.Order, er
 		orderDetails, err := s.repo.UFindListOrderDetails(ctx, &domain.Order{
 			OrderId: order.OrderId,
 		})
+		details := make([]*domain.OrderDetail, 0)
+		for _, detail := range orderDetails {
+			orderDetail := domain.OrderDetailAggregate(ctx, detail, s.productDomainSvc)
+			details = append(details, orderDetail)
+		}
+
 		if err != nil {
 			return nil, errors.Wrap(err, "service.GetListOrdersDeleted")
 		}
-		domain.OrderAggregate(ctx, order, s.userDomainSvc, orderDetails)
+		domain.OrderAggregate(ctx, order, s.userDomainSvc, details)
 	}
 	slog.Info("GetListOrdersDeleted=======", results)
 	return results, nil

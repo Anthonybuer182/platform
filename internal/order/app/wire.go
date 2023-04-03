@@ -10,8 +10,8 @@ import (
 	"platform/cmd/order/config"
 	router "platform/internal/order/app/route"
 	"platform/internal/order/eventHandle/handlers"
-	"platform/internal/order/infras"
 	infrasgrpc "platform/internal/order/infras/grpc"
+	"platform/internal/order/infras/mq"
 	"platform/internal/order/infras/repo"
 	"platform/internal/order/usecases/order"
 	"platform/pkg/postgres"
@@ -32,9 +32,10 @@ func InitApp(
 		rabbitMQFunc,
 		pkgConsumer.EventConsumerSet,
 		pkgPublisher.EventPublisherSet,
-		infras.UserEventPublisherSet,
+		mq.UserEventPublisherSet,
 		repo.RepositorySet,
 		infrasgrpc.UsersGRPCClientSet,
+		infrasgrpc.ProductsGRPCClientSet,
 		order.UseCaseSet,
 		router.OrderGRPCServerSet,
 		handlers.OrderedEventHandlerSet,

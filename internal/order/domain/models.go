@@ -1,6 +1,7 @@
 package domain
 
 type OrderModel struct {
-	OrderId string
-	UserId  string
+	OrderId   string
+	ProductId string
+	UserId    string
 }
