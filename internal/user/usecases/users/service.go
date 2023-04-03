@@ -52,8 +52,8 @@ func (s *service) GetDeletedOrder(ctx context.Context) ([]*domain.OrderDto, erro
 }
 func (s *service) DeleteOrder(ctx context.Context) (bool, error) {
 	// 基于mq 发布订阅删除订单
-	event := events.OrderDeleted{
-		OrderId:     "1",
+	event := events.OrderDelete{
+		OrderId:     "1", //uuid.New(),
 		OrderStatus: "1",
 	}
 	order := NewOrder()

@@ -1,10 +1,9 @@
-package handlers
+package subscribe
 
 import (
 	"context"
 
 	"platform/internal/pkg/event"
-	"platform/internal/user/events"
 	"platform/internal/user/usecases/users"
 
 	"github.com/google/wire"
@@ -14,11 +13,11 @@ type orderDeletedEventHandler struct {
 	uc users.UseCase
 }
 
-var _ events.OrderDeletedEventHandler = (*orderDeletedEventHandler)(nil)
+var _ OrderDeletedEventHandler = (*orderDeletedEventHandler)(nil)
 
 var OrderDeletedEventHandlerSet = wire.NewSet(NewOrderDeletedEventHandler)
 
-func NewOrderDeletedEventHandler(uc users.UseCase) events.OrderDeletedEventHandler {
+func NewOrderDeletedEventHandler(uc users.UseCase) OrderDeletedEventHandler {
 	return &orderDeletedEventHandler{
 		uc: uc,
 	}

@@ -18,6 +18,11 @@ func (e Ordered) Identity() string {
 	return "Ordered"
 }
 
+type OrderDelete struct {
+	shared.DomainEvent
+	OrderId     string `json:"orderId"`
+	OrderStatus string `json:"orderStatus"`
+}
 type OrderDeleted struct {
 	shared.DomainEvent
 	OrderId     string `json:"orderId"`
