@@ -6,7 +6,7 @@ import (
 	"github.com/google/wire"
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slog"
-	"platform/internal/order/domain/entity"
+	"platform/internal/order/domain"
 	event2 "platform/internal/order/eventHandle"
 	"platform/internal/order/usecases/order"
 	"platform/internal/pkg/event"
@@ -34,7 +34,7 @@ func NewOrderedEventHandlerImpl(
 func (h *OrderedEventHandlerImpl) Handle(ctx context.Context, e event.UserOrderDelete) error {
 	slog.Info("OrderedEventHandlerImpl-Handle", "UserOrderDelete", e)
 
-	order := entity.DeleteOrder(e)
+	order := domain.DeleteOrder(e)
 	//删除订单
 	err := h.uc.DeleteOrder(ctx, order)
 

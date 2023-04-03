@@ -5,7 +5,6 @@ import (
 	"github.com/google/wire"
 	"github.com/pkg/errors"
 	"platform/internal/order/domain"
-	"platform/internal/order/domain/entity"
 )
 
 var _ UseCase = (*service)(nil)
@@ -28,7 +27,7 @@ func NewService(repo OrdersRepo,
 	}
 }
 
-func (s *service) GetListOrdersDeleted(ctx context.Context) ([]*entity.Order, error) {
+func (s *service) GetListOrdersDeleted(ctx context.Context) ([]*domain.Order, error) {
 	results, err := s.repo.UFindListDeleteOrder(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "service.GetListOrdersDeleted")
@@ -36,18 +35,18 @@ func (s *service) GetListOrdersDeleted(ctx context.Context) ([]*entity.Order, er
 
 	for _, order := range results {
 		//处理order的订单明细
-		orderDetails, err := s.repo.UFindListOrderDetails(ctx, &domain.OrderModel{
-			OrderId: order.OrderId.String(),
+		orderDetails, err := s.repo.UFindListOrderDetails(ctx, &domain.Order{
+			OrderId: order.OrderId,
 		})
 		if err != nil {
 			return nil, errors.Wrap(err, "service.GetListOrdersDeleted")
 		}
-		entity.OrderAggregate(ctx, order, s.userDomainSvc, orderDetails)
+		domain.OrderAggregate(ctx, order, s.userDomainSvc, orderDetails)
 	}
 	return results, nil
 }
 
-func (s *service) DeleteOrder(cxt context.Context, en *entity.CmdOrders) error {
+func (s *service) DeleteOrder(cxt context.Context, en *domain.CmdOrders) error {
 	err := s.repo.UDeleteOrder(cxt, en)
 	if err != nil {
 		return errors.Wrap(err, "service.U_DeleteOrder")

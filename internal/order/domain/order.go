@@ -1,8 +1,7 @@
-package entity
+package domain
 
 import (
 	"context"
-	"platform/internal/order/domain"
 	shared "platform/internal/pkg/shared_kernel"
 	"strconv"
 	"time"
@@ -18,10 +17,10 @@ type Order struct {
 	OrderDetail []*OrderDetail
 }
 
-func OrderAggregate(ctx context.Context, order *Order, userDomainService domain.UserDomainService, details []*OrderDetail) *Order {
+func OrderAggregate(ctx context.Context, order *Order, userDomainService UserDomainService, details []*OrderDetail) *Order {
 
 	//通过grpc查询用户服务
-	user, err := userDomainService.GetUserById(ctx, &domain.OrderModel{
+	user, err := userDomainService.GetUserById(ctx, &OrderModel{
 		UserId: strconv.Itoa(int(order.Users.UserId)),
 	})
 	var orderUser *Users

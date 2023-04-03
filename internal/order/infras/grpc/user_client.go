@@ -3,11 +3,12 @@ package infrasgrpc
 import (
 	"context"
 	"github.com/google/wire"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"platform/cmd/order/config"
 	"platform/internal/order/domain"
-	"platform/internal/order/domain/entity"
+	"platform/proto/gen"
 )
 
 type usersGRPCClient struct {
@@ -32,21 +33,22 @@ func NewGRPCUserClient(cfg *config.Config) (domain.UserDomainService, error) {
 func (p *usersGRPCClient) GetUserById(
 	ctx context.Context,
 	model *domain.OrderModel,
-) ([]*entity.Users, error) {
-	//c := gen.NewUserServiceClient(p.conn)
+) ([]*domain.Users, error) {
+	c := gen.NewUserServiceClient(p.conn)
+	ids := make([]string, 1)
+	ids = append(ids, model.UserId)
+	res, err := c.GetUsers(ctx, &gen.GetUsersRequest{Id: ids})
+	if err != nil {
+		return nil, errors.Wrap(err, "usersGRPCClient-c.GetItemsByType")
+	}
 
-	//res, err := c.GetUserInfo(ctx, &gen.GetUserInfoRequest{})
-	//if err != nil {
-	//	return nil, errors.Wrap(err, "usersGRPCClient-c.GetItemsByType")
-	//}
-
-	results := make([]*entity.Users, 0)
-	//for _, item := range res.ItemTypes {
-	//	results = append(results, &domain.UserModel{
-	//		Name: item.Name,
-	//		Passwd: item.Passwd,
-	//	})
-	//}
+	results := make([]*domain.Users, 0)
+	for _, item := range res.GetUsers() {
+		results = append(results, &domain.Users{
+			UserName: item.UserName,
+			UserId:   item.Id,
+		})
+	}
 
 	return results, nil
 }
