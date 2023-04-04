@@ -76,8 +76,6 @@ func main() {
 		pkgConsumer.ConsumerTag("order-consumer"),
 	)
 
-	slog.Info("🌏 start server...", "address", fmt.Sprintf("%s:%d", cfg.HTTP.Host, cfg.HTTP.Port))
-
 	go func() {
 		err := a.Consumer.StartConsumer(a.Worker)
 		if err != nil {

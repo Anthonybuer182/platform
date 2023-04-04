@@ -55,16 +55,29 @@ func (g *OrderGRPCServer) GetListDeleteOrders(
 		itemUser := item.Users
 		username := itemUser.UserName
 		slog.Info("item===========,", username)
-		users := make([]*gen.UserDto, 1)
 		user := &gen.UserDto{
 			Name:      username,
 			Telephone: "xxxx",
 		}
-		users = append(users, user)
+
+		detailsDtos := make([]*gen.DetailsDto, 0)
+		for _, detail := range item.OrderDetail {
+			detailDto := &gen.DetailsDto{
+				Quantity: int32(detail.Quantity),
+				Amount:   float64(detail.Price),
+				Products: &gen.ProductDto{
+					Price:       detail.Product.Price,
+					ProductName: detail.Product.ProductName,
+					Category:    detail.Product.Category,
+				},
+			}
+			detailsDtos = append(detailsDtos, detailDto)
+		}
 		res.Orders = append(res.Orders, &gen.OrderDto{
 			OrderNum:    strconv.Itoa(item.OrderId),
 			OrderStatus: item.OrderStatus,
-			Users:       users,
+			Users:       user,
+			Details:     detailsDtos,
 		})
 	}
 

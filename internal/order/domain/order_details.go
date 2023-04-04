@@ -35,9 +35,9 @@ func OrderDetailAggregate(ctx context.Context, order *OrderDetails, productDomai
 		Quantity: order.Quantity,
 		Price:    order.Price,
 	}
-	if err != nil && len(products) > 0 {
+	if err == nil && len(products) > 0 {
 		orderDetail.Product = products[0]
 	}
-	slog.Info("OrderAggregate===========", orderDetail, order)
+	slog.Info("OrderDetailsAggregate===========", orderDetail, order)
 	return orderDetail
 }

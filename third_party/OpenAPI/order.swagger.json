@@ -60,6 +60,25 @@
         }
       }
     },
+    "orderapiDetailsDto": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "products": {
+          "$ref": "#/definitions/orderapiProductDto"
+        },
+        "Quantity": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
     "orderapiGetListOrderDeleteResponse": {
       "type": "object",
       "properties": {
@@ -83,35 +102,29 @@
         "orderStatus": {
           "type": "string"
         },
-        "products": {
+        "details": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/orderapiProductDto"
+            "$ref": "#/definitions/orderapiDetailsDto"
           }
         },
         "users": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/orderapiUserDto"
-          }
+          "$ref": "#/definitions/orderapiUserDto"
         }
       }
     },
     "orderapiProductDto": {
       "type": "object",
       "properties": {
-        "id": {
+        "ProductName": {
           "type": "string"
         },
-        "sku": {
-          "type": "string"
-        },
-        "name": {
+        "Category": {
           "type": "string"
         },
         "price": {
           "type": "number",
-          "format": "double"
+          "format": "float"
         }
       }
     },

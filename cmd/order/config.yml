@@ -7,7 +7,7 @@ http:
   port: 5004
 
 users_client:
-  url:
+  url: 192.168.30.227:5001
 
 postgres:
   pool_max: 2
