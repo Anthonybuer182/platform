@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"platform/cmd/order/config"
 	"platform/internal/order/app/route"
+	"platform/internal/order/domain/svc"
 	"platform/internal/order/eventHandle/handlers"
 	"platform/internal/order/infras/grpc"
 	"platform/internal/order/infras/mq"
@@ -48,6 +49,7 @@ func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnSt
 	}
 	userEventPublisher := mq.NewUserEventPublisher(eventPublisher)
 	ordersRepo := repo.NewOrderRepo(dbEngine)
+	orderRepo := repo.NewDomainOrderRepo(dbEngine)
 	userDomainService, err := infrasgrpc.NewGRPCUserClient(cfg)
 	if err != nil {
 		cleanup2()
@@ -60,10 +62,11 @@ func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnSt
 		cleanup()
 		return nil, nil, err
 	}
-	useCase := order.NewService(ordersRepo, userDomainService, productDomainService, userEventPublisher)
+	aggregateService := svc.NewService(orderRepo, userDomainService, productDomainService)
+	useCase := order.NewService(ordersRepo, aggregateService, userEventPublisher)
 	orderServiceServer := router.NewOrderGRPCServer(grpcServer, useCase)
 	orderedDeletedEventHandler := handlers.NewOrderedEventHandlerImpl(useCase, userEventPublisher)
-	app := New(cfg, dbEngine, connection, eventConsumer, userEventPublisher, ordersRepo, userDomainService, productDomainService, useCase, orderServiceServer, orderedDeletedEventHandler)
+	app := New(cfg, dbEngine, connection, eventConsumer, userEventPublisher, ordersRepo, orderRepo, userDomainService, productDomainService, aggregateService, useCase, orderServiceServer, orderedDeletedEventHandler)
 	return app, func() {
 		cleanup2()
 		cleanup()

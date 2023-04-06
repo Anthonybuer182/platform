@@ -1,12 +1,8 @@
 package domain
 
 import (
-	"context"
 	shared "platform/internal/pkg/shared_kernel"
-	"strconv"
 	"time"
-
-	"golang.org/x/exp/slog"
 )
 
 type Order struct {
@@ -19,20 +15,18 @@ type Order struct {
 	OrderDetail []*OrderDetail
 }
 
-func OrderAggregate(ctx context.Context, order *Order, userDomainService UserDomainService, details []*OrderDetail) *Order {
+func (o Order) Deadline() (deadline time.Time, ok bool) {
+	panic("implement me")
+}
 
-	//通过grpc查询用户服务
-	user, err := userDomainService.GetUserById(ctx, &OrderModel{
-		UserId: strconv.Itoa(int(order.Users.UserId)),
-	})
-	var orderUser *Users
-	if err == nil && len(user) > 0 {
-		userModel := user[0]
-		orderUser = &Users{UserId: userModel.UserId, UserName: userModel.UserName, CreateOn: userModel.CreateOn}
-	}
-	order.OrderDetail = details
-	order.Users = orderUser
-	slog.Info("OrderAggregate===========", user, order)
+func (o Order) Done() <-chan struct{} {
+	panic("implement me")
+}
 
-	return order
+func (o Order) Err() error {
+	panic("implement me")
+}
+
+func (o Order) Value(key any) any {
+	panic("implement me")
 }

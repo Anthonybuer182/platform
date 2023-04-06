@@ -3,7 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"platform/internal/order/domain"
+	"platform/internal/order/domain/svc"
 	"platform/internal/order/eventHandle"
 	"platform/internal/order/usecases/order"
 	"platform/proto/gen"
@@ -23,8 +23,10 @@ type App struct {
 	Consumer            pkgConsumer.EventConsumer
 	OrderPub            order.UserEventPublisher
 	Repo                order.OrdersRepo
-	UserDomainServer    domain.UserDomainService
-	ProductDomainServer domain.ProductDomainService
+	DomainRepo          svc.OrderRepo
+	UserDomainServer    svc.UserDomainService
+	ProductDomainServer svc.ProductDomainService
+	AggregateService    svc.AggregateService
 	UC                  order.UseCase
 	OrderGRPCServer     gen.OrderServiceServer
 	Handler             eventHandle.OrderedDeletedEventHandler
@@ -37,8 +39,10 @@ func New(
 	consumer pkgConsumer.EventConsumer,
 	orderPub order.UserEventPublisher,
 	repo order.OrdersRepo,
-	userDomainSVC domain.UserDomainService,
-	productDomainSvc domain.ProductDomainService,
+	domainRepo svc.OrderRepo,
+	userDomainSVC svc.UserDomainService,
+	productDomainSvc svc.ProductDomainService,
+	aggregateService svc.AggregateService,
 	uc order.UseCase,
 	orderGRPCServer gen.OrderServiceServer,
 	handler eventHandle.OrderedDeletedEventHandler,
@@ -51,8 +55,10 @@ func New(
 		Consumer:            consumer,
 		OrderPub:            orderPub,
 		Repo:                repo,
+		DomainRepo:          domainRepo,
 		UserDomainServer:    userDomainSVC,
 		ProductDomainServer: productDomainSvc,
+		AggregateService:    aggregateService,
 		UC:                  uc,
 		OrderGRPCServer:     orderGRPCServer,
 		Handler:             handler,
