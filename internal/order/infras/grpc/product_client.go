@@ -2,20 +2,20 @@ package infrasgrpc
 
 import (
 	"context"
-	"github.com/google/wire"
 	"platform/internal/order/domain"
-	"platform/internal/order/domain/svc"
+
+	"github.com/google/wire"
 )
 
 type productGRPCClient struct {
 	//conn *grpc.ClientConn
 }
 
-var _ svc.ProductDomainService = (*productGRPCClient)(nil)
+var _ domain.ProductDomainService = (*productGRPCClient)(nil)
 
 var ProductsGRPCClientSet = wire.NewSet(NewGRPCProductClient)
 
-func NewGRPCProductClient() (svc.ProductDomainService, error) {
+func NewGRPCProductClient() (domain.ProductDomainService, error) {
 	//conn, err := grpc.Dial(cfg.UsersClient.URL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	//if err != nil {
 	//	return nil, err

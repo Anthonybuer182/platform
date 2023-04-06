@@ -1,11 +1,11 @@
-package svc
+package domain
 
 import (
 	"context"
+	"strconv"
+
 	"github.com/google/wire"
 	"golang.org/x/exp/slog"
-	"platform/internal/order/domain"
-	"strconv"
 )
 
 var _ AggregateService = (*service)(nil)
@@ -26,26 +26,26 @@ func NewService(repo OrderRepo, domainService UserDomainService, productDomainSe
 	}
 }
 
-func (s *service) OrderAggregate(ctx context.Context, order *domain.Order) *domain.Order {
+func (s *service) OrderAggregate(ctx context.Context, order *Order) *Order {
 
 	//通过grpc查询用户服务
-	user, err := s.userDomainSvc.GetUserById(ctx, &domain.OrderModel{
+	user, err := s.userDomainSvc.GetUserById(ctx, &OrderModel{
 		UserId: strconv.Itoa(int(order.Users.UserId)),
 	})
-	var orderUser *domain.Users
+	var orderUser *Users
 	if err == nil && len(user) > 0 {
 		userModel := user[0]
-		orderUser = &domain.Users{UserId: userModel.UserId, UserName: userModel.UserName, CreateOn: userModel.CreateOn}
+		orderUser = &Users{UserId: userModel.UserId, UserName: userModel.UserName, CreateOn: userModel.CreateOn}
 	}
 	//处理order的订单明细
-	orderParam := &domain.Order{
+	orderParam := &Order{
 		OrderId: order.OrderId,
 	}
 	orderDetails, err := s.repo.FindListOrderDetails(ctx, orderParam)
 
-	details := make([]*domain.OrderDetail, 0)
+	details := make([]*OrderDetail, 0)
 	for _, detail := range orderDetails {
-		orderDetail := domain.OrderDetailAggregate(ctx, detail, s.productDomainSvc)
+		orderDetail := OrderDetailAggregate(ctx, detail, s.productDomainSvc)
 		details = append(details, orderDetail)
 	}
 

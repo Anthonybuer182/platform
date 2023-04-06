@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 	"platform/cmd/order/config"
 	router "platform/internal/order/app/route"
-	"platform/internal/order/domain/svc"
+	"platform/internal/order/domain"
 	"platform/internal/order/eventHandle/handlers"
 	infrasgrpc "platform/internal/order/infras/grpc"
 	"platform/internal/order/infras/mq"
@@ -38,7 +38,7 @@ func InitApp(
 		repo.DomainRepositorySet,
 		infrasgrpc.UsersGRPCClientSet,
 		infrasgrpc.ProductsGRPCClientSet,
-		svc.AggregateServiceSet,
+		domain.AggregateServiceSet,
 		order.UseCaseSet,
 		router.OrderGRPCServerSet,
 		handlers.OrderedEventHandlerSet,

@@ -2,9 +2,9 @@ package domain
 
 import (
 	"context"
-	"golang.org/x/exp/slog"
-	"platform/internal/order/domain/svc"
 	"strconv"
+
+	"golang.org/x/exp/slog"
 )
 
 type OrderDetail struct {
@@ -24,7 +24,7 @@ func NewOrderDetail(quantity int, OrderId int, prodcut *Products, price float32)
 	}
 }
 
-func OrderDetailAggregate(ctx context.Context, order *OrderDetails, productDomainService svc.ProductDomainService) *OrderDetail {
+func OrderDetailAggregate(ctx context.Context, order *OrderDetails, productDomainService ProductDomainService) *OrderDetail {
 
 	//通过grpc查询用户服务
 	products, err := productDomainService.GetProductLists(ctx, &OrderModel{

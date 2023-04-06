@@ -3,24 +3,24 @@ package repo
 import (
 	"context"
 	"fmt"
-	"github.com/google/wire"
-	"github.com/pkg/errors"
 	"platform/internal/order/domain"
-	"platform/internal/order/domain/svc"
 	"platform/internal/order/infras/postgresql"
 	"platform/pkg/postgres"
 	"strconv"
+
+	"github.com/google/wire"
+	"github.com/pkg/errors"
 )
 
 type DomainOrderRepo struct {
 	pg postgres.DBEngine
 }
 
-var _ svc.OrderRepo = (*DomainOrderRepo)(nil)
+var _ domain.OrderRepo = (*DomainOrderRepo)(nil)
 
 var DomainRepositorySet = wire.NewSet(NewDomainOrderRepo)
 
-func NewDomainOrderRepo(pg postgres.DBEngine) svc.OrderRepo {
+func NewDomainOrderRepo(pg postgres.DBEngine) domain.OrderRepo {
 	return &DomainOrderRepo{
 		pg: pg,
 	}

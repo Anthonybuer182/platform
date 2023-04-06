@@ -2,26 +2,26 @@ package infrasgrpc
 
 import (
 	"context"
+	"platform/cmd/order/config"
+	"platform/internal/order/domain"
+	"platform/proto/gen"
+
 	"github.com/google/wire"
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"platform/cmd/order/config"
-	"platform/internal/order/domain"
-	"platform/internal/order/domain/svc"
-	"platform/proto/gen"
 )
 
 type usersGRPCClient struct {
 	conn *grpc.ClientConn
 }
 
-var _ svc.UserDomainService = (*usersGRPCClient)(nil)
+var _ domain.UserDomainService = (*usersGRPCClient)(nil)
 
 var UsersGRPCClientSet = wire.NewSet(NewGRPCUserClient)
 
-func NewGRPCUserClient(cfg *config.Config) (svc.UserDomainService, error) {
+func NewGRPCUserClient(cfg *config.Config) (domain.UserDomainService, error) {
 	conn, err := grpc.Dial(cfg.UsersClient.URL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err

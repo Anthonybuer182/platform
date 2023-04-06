@@ -2,11 +2,11 @@ package order
 
 import (
 	"context"
+	"platform/internal/order/domain"
+
 	"github.com/google/wire"
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slog"
-	"platform/internal/order/domain"
-	"platform/internal/order/domain/svc"
 )
 
 var _ UseCase = (*service)(nil)
@@ -15,12 +15,12 @@ var UseCaseSet = wire.NewSet(NewService)
 
 type service struct {
 	repo             OrdersRepo
-	AggregateService svc.AggregateService
+	AggregateService domain.AggregateService
 	UserEventPub     UserEventPublisher
 }
 
 func NewService(repo OrdersRepo,
-	aggregateService svc.AggregateService,
+	aggregateService domain.AggregateService,
 	publisher UserEventPublisher) UseCase {
 	return &service{
 		repo:             repo,

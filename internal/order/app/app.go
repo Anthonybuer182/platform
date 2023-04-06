@@ -3,17 +3,18 @@ package app
 import (
 	"context"
 	"encoding/json"
-	"platform/internal/order/domain/svc"
+	"platform/internal/order/domain"
 	"platform/internal/order/eventHandle"
 	"platform/internal/order/usecases/order"
 	"platform/proto/gen"
 
-	amqp "github.com/rabbitmq/amqp091-go"
-	"golang.org/x/exp/slog"
 	"platform/cmd/order/config"
 	"platform/internal/pkg/event"
 	"platform/pkg/postgres"
 	pkgConsumer "platform/pkg/rabbitmq/consumer"
+
+	amqp "github.com/rabbitmq/amqp091-go"
+	"golang.org/x/exp/slog"
 )
 
 type App struct {
@@ -23,10 +24,10 @@ type App struct {
 	Consumer            pkgConsumer.EventConsumer
 	OrderPub            order.UserEventPublisher
 	Repo                order.OrdersRepo
-	DomainRepo          svc.OrderRepo
-	UserDomainServer    svc.UserDomainService
-	ProductDomainServer svc.ProductDomainService
-	AggregateService    svc.AggregateService
+	DomainRepo          domain.OrderRepo
+	UserDomainServer    domain.UserDomainService
+	ProductDomainServer domain.ProductDomainService
+	AggregateService    domain.AggregateService
 	UC                  order.UseCase
 	OrderGRPCServer     gen.OrderServiceServer
 	Handler             eventHandle.OrderedDeletedEventHandler
@@ -39,10 +40,10 @@ func New(
 	consumer pkgConsumer.EventConsumer,
 	orderPub order.UserEventPublisher,
 	repo order.OrdersRepo,
-	domainRepo svc.OrderRepo,
-	userDomainSVC svc.UserDomainService,
-	productDomainSvc svc.ProductDomainService,
-	aggregateService svc.AggregateService,
+	domainRepo domain.OrderRepo,
+	userDomainSVC domain.UserDomainService,
+	productDomainSvc domain.ProductDomainService,
+	aggregateService domain.AggregateService,
 	uc order.UseCase,
 	orderGRPCServer gen.OrderServiceServer,
 	handler eventHandle.OrderedDeletedEventHandler,
