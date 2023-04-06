@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/wire"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -37,7 +38,7 @@ func (p *orderGRPCClient) GetDeletedOreders(
 	ctx context.Context,
 	model *domain.PlaceOrderModel,
 	isBarista bool,
-) ([]*domain.ItemModel, error) {
+) ([]*domain.OrderDto, error) {
 	c := gen.NewOrderServiceClient(p.conn)
 	// res, err := c.GetListDeleteOrders(ctx, &gen.GetListDeleteOrdersRequest{ItemTypes: strings.TrimLeft(itemTypes, ",")})
 	res, err := c.GetListDeleteOrders(ctx, &gen.GetListDeleteOrdersRequest{})
@@ -45,12 +46,26 @@ func (p *orderGRPCClient) GetDeletedOreders(
 		return nil, errors.Wrap(err, "orderGRPCClient-c.GetListDeleteOrders")
 	}
 
-	results := make([]*domain.ItemModel, 0)
+	results := make([]*domain.OrderDto, 0)
 	for _, item := range res.Orders {
-		results = append(results, &domain.ItemModel{
+		results = append(results, &domain.OrderDto{
 			Id:          item.Id,
 			OrderNum:    item.OrderNum,
 			OrderStatus: item.OrderStatus,
+			DetailsDto: lo.Map(item.Details, func(item *gen.DetailsDto, _ int) *domain.DetailsDto {
+				return &domain.DetailsDto{
+					Id: item.Id,
+					ProductDto: domain.ProductDto{
+						ProductName: item.Products.ProductName,
+						Category:    item.Products.Category,
+						Price:       item.Products.Price,
+					},
+				}
+			}),
+			UserDto: &domain.UserDto{
+				Id:   item.Users.Id,
+				Name: item.Users.Name,
+			},
 		})
 	}
 
