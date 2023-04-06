@@ -193,13 +193,32 @@
         }
       }
     },
+    "productapiDetailsDtos": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "products": {
+          "$ref": "#/definitions/productapiProductDtos"
+        },
+        "Quantity": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "amount": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
     "productapiGetDeletedOrdersResponse": {
       "type": "object",
       "properties": {
         "orders": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/productapiOrdersDto"
+            "$ref": "#/definitions/productapiOrderDtos"
           }
         }
       }
@@ -269,27 +288,55 @@
         }
       }
     },
-    "productapiOrdersDto": {
+    "productapiOrderDtos": {
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "pruductId": {
-          "type": "integer",
-          "format": "int32"
-        },
-        "pruductName": {
           "type": "string"
         },
-        "type": {
-          "type": "integer",
-          "format": "int32"
+        "orderNum": {
+          "type": "string"
+        },
+        "orderStatus": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/productapiDetailsDtos"
+          }
+        },
+        "users": {
+          "$ref": "#/definitions/productapiUserDtos"
+        }
+      }
+    },
+    "productapiProductDtos": {
+      "type": "object",
+      "properties": {
+        "ProductName": {
+          "type": "string"
+        },
+        "Category": {
+          "type": "string"
         },
         "price": {
           "type": "number",
-          "format": "double"
+          "format": "float"
+        }
+      }
+    },
+    "productapiUserDtos": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "telephone": {
+          "type": "string"
         }
       }
     },

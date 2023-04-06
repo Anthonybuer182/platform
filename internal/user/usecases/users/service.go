@@ -38,17 +38,7 @@ func (s *service) GetDeletedOrder(ctx context.Context) ([]*domain.OrderDto, erro
 	model := domain.PlaceOrderModel{}
 	deletedOrders, err := s.orderDomainSvc.GetDeletedOreders(ctx, &model, true)
 	fmt.Println(deletedOrders, err)
-
-	//mock数据
-	order1 := domain.OrderDto{
-		Id:          121,
-		ProductId:   212,
-		PruductName: "iphone",
-		Type:        1,
-		Price:       6000,
-	}
-	orders := []*domain.OrderDto{&order1}
-	return orders, nil
+	return deletedOrders, nil
 }
 func (s *service) DeleteOrder(ctx context.Context) (bool, error) {
 	// 基于mq 发布订阅删除订单

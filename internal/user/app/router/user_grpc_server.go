@@ -3,11 +3,13 @@ package router
 import (
 	"context"
 
+	"platform/internal/user/domain"
 	"platform/internal/user/usecases/users"
 	"platform/proto/gen"
 
 	"github.com/google/wire"
 	"github.com/pkg/errors"
+	"github.com/samber/lo"
 	"golang.org/x/exp/slog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -72,12 +74,24 @@ func (g *userGRPCServer) GetDeletedOrders(
 	}
 
 	for _, item := range results {
-		res.Orders = append(res.Orders, &gen.OrdersDto{
-			Id:          int32(item.Id),
-			PruductId:   int32(item.ProductId),
-			PruductName: item.PruductName,
-			Type:        int32(item.Type),
-			Price:       item.Price,
+		res.Orders = append(res.Orders, &gen.OrderDtos{
+			Id:          item.Id,
+			OrderNum:    item.OrderNum,
+			OrderStatus: item.OrderStatus,
+			Details: lo.Map(item.DetailsDto, func(item *domain.DetailsDto, _ int) *gen.DetailsDtos {
+				return &gen.DetailsDtos{
+					Id: item.Id,
+					Products: &gen.ProductDtos{
+						ProductName: item.ProductDto.ProductName,
+						Category:    item.ProductDto.Category,
+						Price:       item.ProductDto.Price,
+					},
+				}
+			}),
+			Users: &gen.UserDtos{
+				Id:   item.UserDto.Id,
+				Name: item.UserDto.Name,
+			},
 		})
 	}
 	// 基于rpc 调用order接口查询已删除的订单

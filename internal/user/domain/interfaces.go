@@ -12,6 +12,6 @@ type (
 )
 type (
 	OrderDomainService interface {
-		GetDeletedOreders(context.Context, *PlaceOrderModel, bool) ([]*ItemModel, error)
+		GetDeletedOreders(context.Context, *PlaceOrderModel, bool) ([]*OrderDto, error)
 	}
 )
