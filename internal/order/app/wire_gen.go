@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc"
 	"platform/cmd/order/config"
 	"platform/internal/order/app/route"
-	"platform/internal/order/domain/svc"
+	"platform/internal/order/domain"
 	"platform/internal/order/eventHandle/handlers"
 	"platform/internal/order/infras/grpc"
 	"platform/internal/order/infras/mq"
@@ -62,7 +62,7 @@ func InitApp(cfg *config.Config, dbConnStr postgres.DBConnString, rabbitMQConnSt
 		cleanup()
 		return nil, nil, err
 	}
-	aggregateService := svc.NewService(orderRepo, userDomainService, productDomainService)
+	aggregateService := domain.NewService(orderRepo, userDomainService, productDomainService)
 	useCase := order.NewService(ordersRepo, aggregateService, userEventPublisher)
 	orderServiceServer := router.NewOrderGRPCServer(grpcServer, useCase)
 	orderedDeletedEventHandler := handlers.NewOrderedEventHandlerImpl(useCase, userEventPublisher)
