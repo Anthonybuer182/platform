@@ -15,7 +15,8 @@ import (
 	"platform/internal/order/infras/mq"
 	"platform/internal/order/infras/repo"
 	"platform/internal/order/usecases/order"
-	"platform/pkg/postgres"
+	"platform/pkg"
+	"platform/pkg/db"
 	"platform/pkg/rabbitmq"
 	pkgConsumer "platform/pkg/rabbitmq/consumer"
 	pkgPublisher "platform/pkg/rabbitmq/publisher"
@@ -23,7 +24,7 @@ import (
 
 func InitApp(
 	cfg *config.Config,
-	dbConnStr postgres.DBConnString,
+	ds *config.DataSource,
 	rabbitMQConnStr rabbitmq.RabbitMQConnStr,
 	grpcServer *grpc.Server,
 ) (*App, func(), error) {
@@ -45,8 +46,8 @@ func InitApp(
 	))
 }
 
-func dbEngineFunc(url postgres.DBConnString) (postgres.DBEngine, func(), error) {
-	db, err := postgres.NewPostgresDB(url)
+func dbEngineFunc(dts *config.DataSource) (pkg.DB, func(), error) {
+	db, err := db.GetDb(*dts)
 	if err != nil {
 		return nil, nil, err
 	}

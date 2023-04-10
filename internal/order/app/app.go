@@ -6,11 +6,11 @@ import (
 	"platform/internal/order/domain"
 	"platform/internal/order/eventHandle"
 	"platform/internal/order/usecases/order"
+	"platform/pkg"
 	"platform/proto/gen"
 
 	"platform/cmd/order/config"
 	"platform/internal/pkg/event"
-	"platform/pkg/postgres"
 	pkgConsumer "platform/pkg/rabbitmq/consumer"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -19,7 +19,7 @@ import (
 
 type App struct {
 	Cfg                 *config.Config
-	PG                  postgres.DBEngine
+	Db                  pkg.DB
 	AMQPConn            *amqp.Connection
 	Consumer            pkgConsumer.EventConsumer
 	OrderPub            order.UserEventPublisher
@@ -35,7 +35,7 @@ type App struct {
 
 func New(
 	cfg *config.Config,
-	pg postgres.DBEngine,
+	db pkg.DB,
 	amqpConn *amqp.Connection,
 	consumer pkgConsumer.EventConsumer,
 	orderPub order.UserEventPublisher,
@@ -51,7 +51,7 @@ func New(
 ) *App {
 	return &App{
 		Cfg:                 cfg,
-		PG:                  pg,
+		Db:                  db,
 		AMQPConn:            amqpConn,
 		Consumer:            consumer,
 		OrderPub:            orderPub,

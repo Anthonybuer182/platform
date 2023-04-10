@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"platform/internal/order/domain"
 	"platform/internal/order/infras/postgresql"
-	"platform/pkg/postgres"
+	"platform/pkg"
 	"strconv"
 
 	"github.com/google/wire"
@@ -13,14 +13,14 @@ import (
 )
 
 type DomainOrderRepo struct {
-	pg postgres.DBEngine
+	pg pkg.DB
 }
 
 var _ domain.OrderRepo = (*DomainOrderRepo)(nil)
 
 var DomainRepositorySet = wire.NewSet(NewDomainOrderRepo)
 
-func NewDomainOrderRepo(pg postgres.DBEngine) domain.OrderRepo {
+func NewDomainOrderRepo(pg pkg.DB) domain.OrderRepo {
 	return &DomainOrderRepo{
 		pg: pg,
 	}

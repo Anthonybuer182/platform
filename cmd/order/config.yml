@@ -9,9 +9,15 @@ http:
 users_client:
   url: 192.168.30.227:5001
 
-postgres:
-  pool_max: 2
-  dsn_url: host=127.0.0.1 user=postgres password=P@ssw0rd dbname=postgres sslmode=disable
+datasource:
+  type: postgres
+  postgres:
+    pool_max: 2
+    dsn_url: host=127.0.0.1 user=postgres password=P@ssw0rd dbname=postgres sslmode=disable
+  mysql:
+    max_open_conns: 2
+    max_idle_conns: 1
+    url: root:Simba123!@#@tcp(192.168.24.241:3306)/orders?charset=utf8&parseTime=True&loc=Local
 
 rabbitmq:
   url: amqp://guest:guest@127.0.0.1:5672/

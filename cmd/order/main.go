@@ -13,7 +13,6 @@ import (
 	"platform/cmd/order/config"
 	"platform/internal/order/app"
 	"platform/pkg/logger"
-	"platform/pkg/postgres"
 	"platform/pkg/rabbitmq"
 
 	"github.com/sirupsen/logrus"
@@ -40,7 +39,7 @@ func main() {
 		slog.Error("failed get config", err)
 	}
 
-	slog.Info("⚡ init app", "name", cfg.Name, "version", cfg.Version)
+	slog.Info("⚡ init app", "name", cfg.Name, "version", cfg.Version, "dbUrl", cfg.Mysql.URL)
 
 	// set up logrus
 	logrus.SetFormatter(&logrus.JSONFormatter{})
@@ -57,7 +56,7 @@ func main() {
 		<-ctx.Done()
 	}()
 
-	a, cleanup, err := app.InitApp(cfg, postgres.DBConnString(cfg.PG.DsnURL), rabbitmq.RabbitMQConnStr(cfg.RabbitMQ.URL), server)
+	a, cleanup, err := app.InitApp(cfg, &cfg.DataSource, rabbitmq.RabbitMQConnStr(cfg.RabbitMQ.URL), server)
 	if err != nil {
 		slog.Error("failed init app", err)
 		cancel()

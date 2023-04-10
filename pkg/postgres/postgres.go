@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	"log"
+	configs "platform/pkg/config"
 	"time"
 
 	"golang.org/x/exp/slog"
@@ -13,8 +14,6 @@ const (
 	_defaultConnTimeout  = time.Second
 )
 
-type DBConnString string
-
 type postgres struct {
 	connAttempts int
 	connTimeout  time.Duration
@@ -24,7 +23,7 @@ type postgres struct {
 
 var _ DBEngine = (*postgres)(nil)
 
-func NewPostgresDB(url DBConnString) (DBEngine, error) {
+func NewPostgresDB(url configs.DBConnString) (DBEngine, error) {
 	slog.Info("CONN", "connect string", url)
 
 	pg := &postgres{
@@ -67,4 +66,8 @@ func (p *postgres) Close() {
 	if p.db != nil {
 		p.db.Close()
 	}
+}
+
+func (p *postgres) GetDbName() string {
+	return "postgres"
 }

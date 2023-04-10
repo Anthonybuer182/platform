@@ -1,4 +1,4 @@
-package postgres
+package mysqld
 
 import (
 	"platform/pkg"
@@ -6,5 +6,5 @@ import (
 
 type DBEngine interface {
 	pkg.DB
-	Configure(...Option) DBEngine
+	Configure(...Options) DBEngine
 }

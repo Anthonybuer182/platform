@@ -15,13 +15,25 @@ type (
 		configs.HTTP `yaml:"http"`
 		configs.Log  `yaml:"logger"`
 		UsersClient  `yaml:"users_client"`
-		PG           `yaml:"postgres"`
+		DataSource   `yaml:"datasource"`
 		RabbitMQ     `yaml:"rabbitmq"`
 	}
 
+	DataSource struct {
+		Type  string `env-required:"true" yaml:"type" env:"TYPE"`
+		Mysql Mysql  `env-required:"true" yaml:"mysql" env:"MYSQL"`
+		PG    PG     `env-required:"true" yaml:"postgres" env:"POSTGRES"`
+	}
+
 	PG struct {
-		PoolMax int    `env-required:"true" yaml:"pool_max" env:"PG_POOL_MAX"`
-		DsnURL  string `env-required:"true" yaml:"dsn_url" env:"PG_DSN_URL"`
+		PoolMax int                  `env-required:"true" yaml:"pool_max" env:"PG_POOL_MAX"`
+		DsnURL  configs.DBConnString `env-required:"true" yaml:"dsn_url" env:"PG_DSN_URL"`
+	}
+
+	Mysql struct {
+		MaxOpenConns int                  `env-required:"true" yaml:"max_open_conns" env:"MAX_OPEN_CONNS"`
+		MaxIdleConns int                  `env-required:"true" yaml:"max_idle_conns" env:"MAX_IDLE_CONNS"`
+		URL          configs.DBConnString `env-required:"true" yaml:"url" env:"URL"`
 	}
 
 	RabbitMQ struct {

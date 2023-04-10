@@ -8,19 +8,19 @@ import (
 	"platform/internal/order/domain"
 	"platform/internal/order/infras/postgresql"
 	"platform/internal/order/usecases/order"
-	"platform/pkg/postgres"
+	"platform/pkg"
 	"strconv"
 )
 
 type OrderRepo struct {
-	pg postgres.DBEngine
+	pg pkg.DB
 }
 
 var _ order.OrdersRepo = (*OrderRepo)(nil)
 
 var RepositorySet = wire.NewSet(NewOrderRepo)
 
-func NewOrderRepo(pg postgres.DBEngine) order.OrdersRepo {
+func NewOrderRepo(pg pkg.DB) order.OrdersRepo {
 	return &OrderRepo{
 		pg: pg,
 	}
